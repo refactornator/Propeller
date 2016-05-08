@@ -9,24 +9,74 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  Navigator,
+  TouchableOpacity,
+  StatusBar,
 } from 'react-native';
+
+import PipelineSummary from './components/pipeline_summary';
+
+var NavigationBarRouteMapper = {
+
+  LeftButton: function(route, navigator, index, navState) {
+    if (index === 0) {
+      return null;
+    }
+
+    var previousRoute = navState.routeStack[index - 1];
+    return (
+      <TouchableOpacity
+        onPress={() => navigator.pop()}
+        style={styles.navBarLeftButton}>
+        <Text style={[styles.navBarText, styles.navBarButtonText]}>
+          {previousRoute.title}
+        </Text>
+      </TouchableOpacity>
+    );
+  },
+
+  RightButton: function(route, navigator, index, navState) {
+    return (
+      <TouchableOpacity
+        onPress={() => navigator.push(newRandomRoute())}
+        style={styles.navBarRightButton}>
+        <Text style={[styles.navBarText, styles.navBarButtonText]}>
+          Next
+        </Text>
+      </TouchableOpacity>
+    );
+  },
+
+  Title: function(route, navigator, index, navState) {
+    return (
+      <Text style={[styles.navBarText, styles.navBarTitleText]}>
+        {route.title}
+      </Text>
+    );
+  },
+
+};
 
 class SingleProp extends Component {
   render() {
+    let pipelines = [{"name":"main","url":"/pipelines/main","paused":false,"groups":[{"name":"apps-manager","jobs":["legacy-unit","legacy-deployment-pcf","legacy-integration-pcf","js-unit","js-deployment-pcf","js-integration-pcf","usage-unit","usage-deployment-pcf","usage-integration-pcf","create-pcf-release","js-deployment-pws-a1","js-deployment-pws-a1-edge","js-deployment-pws-prod"]},{"name":"docker","jobs":["build-base-docker-image","build-final-docker-image"],"resources":["apps-manager-base-dockerfile","apps-manager-final-dockerfile","apps-manager-js-base-docker-image","apps-manager-js-final-docker-image","apps-manager-js-package-json","legacy-gemfile","app-usage-service-gemfile","ubuntu-14.04"]}]},{"name":"salmon","url":"/pipelines/salmon","paused":false,"groups":[{"name":"salmon/example-aws","jobs":["build-runtime","acquire-environment-from-clean","manually-release-environment-to-dirty","upload-pivotal","configure-ert","import-stemcell","deploy-ert","run-cats"]},{"name":"housekeeping","jobs":["soil-unclaimed-clean-environments","acquire-environment-from-dirty","destroy-environment","deploy-ops-manager","configure-microbosh","deploy-microbosh","release-environment-to-clean"]}]},{"name":"environments","url":"/pipelines/environments","paused":false,"groups":[{"name":"mrblue","jobs":["mrblue-cloudformation","mrblue-bosh-deploy","mrblue-cf-deploy","mrblue-bosh-cleanup"]}]},{"name":"build-docker-image","url":"/pipelines/build-docker-image","paused":false,"groups":[{"name":"Docker Image Generation","jobs":["create-docker-image"]}]},{"name":"legacy","url":"/pipelines/legacy","paused":false}];
+
     return (
-      <View style={styles.container}>
-        <Text style={styles.welcome}>
-          Welcome to React Native!
-        </Text>
-        <Text style={styles.instructions}>
-          To get started, edit index.ios.js
-        </Text>
-        <Text style={styles.instructions}>
-          Press Cmd+R to reload,{'\n'}
-          Cmd+D or shake for dev menu
-        </Text>
-      </View>
+      <Navigator
+        debugOverlay={false}
+        style={styles.appContainer}
+        initialRoute={{ title: 'Pipeline Summary' }}
+        renderScene={(route, navigator) => (
+          <PipelineSummary pipelines={pipelines} />
+        )}
+        navigationBar={
+          <Navigator.NavigationBar
+            routeMapper={NavigationBarRouteMapper}
+            style={styles.navBar}
+          />
+        }
+      />
     );
   }
 }
@@ -34,20 +84,31 @@ class SingleProp extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    backgroundColor: '#F5FCFF',
+    backgroundColor: '#273747',
   },
-  welcome: {
-    fontSize: 20,
-    textAlign: 'center',
-    margin: 10,
+  navBar: {
+    backgroundColor: '#19252F',
   },
-  instructions: {
-    textAlign: 'center',
-    color: '#333333',
-    marginBottom: 5,
+  navBarText: {
+    fontSize: 16,
+    marginVertical: 10,
+  },
+  navBarTitleText: {
+    color: 'white',
+    fontWeight: '500',
+    marginVertical: 9,
+  },
+  navBarLeftButton: {
+    paddingLeft: 10,
+  },
+  navBarRightButton: {
+    paddingRight: 10,
+  },
+  navBarButtonText: {
+    color: '#5890FF',
   },
 });
+
+StatusBar.setBarStyle('light-content', true);
 
 AppRegistry.registerComponent('SingleProp', () => SingleProp);

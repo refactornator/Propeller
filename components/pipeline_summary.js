@@ -1,0 +1,66 @@
+import React, { Component } from 'react';
+import {
+  StyleSheet,
+  Text,
+  View,
+  Navigator,
+  ScrollView,
+  TouchableHighlight,
+} from 'react-native';
+
+class PipelineSummary extends Component {
+  render() {
+    const {pipelines} = this.props;
+
+    const pipelineViews = pipelines.map((pipeline) => {
+      return (
+        <View key={pipeline.name} style={styles.pipelineRow}>
+          <Text style={styles.pipelineName}>{pipeline.name}</Text>
+          <TouchableHighlight onPress={this._onPressButton}>
+            <Text style={[styles.button, styles.paused]}>Play</Text>
+          </TouchableHighlight>
+        </View>
+      );
+    });
+
+    return (
+      <ScrollView style={styles.container}>
+        {pipelineViews}
+      </ScrollView>
+    );
+  }
+}
+
+const styles = StyleSheet.create({
+  container: {
+    flex: 1,
+    backgroundColor: '#273747',
+  },
+  pipelineRow: {
+    height: 44,
+    backgroundColor: '#19252F',
+    flexDirection: 'row',
+    marginTop: 5,
+    marginBottom: 5
+  },
+  pipelineName: {
+    flex: 1,
+    color: 'white',
+    paddingLeft: 10,
+    alignSelf: 'center'
+  },
+  button: {
+    width: 44,
+    height: 44,
+    color: 'white',
+    alignSelf: 'center'
+  },
+  paused: {
+    backgroundColor: '#3498DB'
+  },
+  unpaused: {
+    backgroundColor: '#5D6D7E'
+  },
+});
+
+module.exports = PipelineSummary;
