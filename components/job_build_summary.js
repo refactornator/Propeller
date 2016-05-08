@@ -13,6 +13,14 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 const BuildHeader = require('./build_header');
 
 class JobBuildSummary extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      plan: {"id":"56ce208c","do":[{"id":"56ce208a","aggregate":[{"id":"56ce2088","get":{"type":"git","name":"legacy","resource":"legacy","version":{"ref":"cc824e70189fa7fe27a40be2175f06262154282b"}}},{"id":"56ce2089","get":{"type":"git","name":"ci","resource":"ci","version":{"ref":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"}}}]},{"id":"56ce208b","task":{"name":"legacy-integration","privileged":false}}]}
+    };
+  }
+
   timeFromNow(timeFrom) {
     let now = moment();
     let time = moment.unix(timeFrom);
@@ -30,6 +38,12 @@ class JobBuildSummary extends Component {
     const {build, inputs} = this.props;
     const {start_time, end_time} = build;
 
+    let startTimeReadable = this.timeFromNow(start_time);
+    let endTimeReadable = this.timeFromNow(end_time);
+    let durationReadable = moment.duration(end_time - start_time, 's').format('d(d) h(h) m(m) s(s)', {
+			escape: /\((.+?)\)/
+		});
+
     const inputViews = inputs.map((input, index) => {
       return (
         <View key={index} style={styles.inputRow}>
@@ -44,12 +58,15 @@ class JobBuildSummary extends Component {
       );
     });
 
-
-    let startTimeReadable = this.timeFromNow(start_time);
-    let endTimeReadable = this.timeFromNow(end_time);
-    let durationReadable = moment.duration(end_time - start_time, 's').format('d(d) h(h) m(m) s(s)', {
-			escape: /\((.+?)\)/
-		});
+    const task = this.state.plan.do[1];
+    const taskView = (
+      <View key={task.id} style={styles.taskRow}>
+        <Text style={styles.taskName}>{task.task.name}</Text>
+        <View style={styles.taskStatus}>
+          <Icon name="times" size={14} color="white" style={styles.statusIcon} />
+        </View>
+      </View>
+    );
 
     return (
       <ScrollView style={styles.container}>
@@ -65,6 +82,7 @@ class JobBuildSummary extends Component {
         </View>
 
         <Text style={styles.textHeader}>Tasks</Text>
+        {taskView}
       </ScrollView>
     );
   }
@@ -118,6 +136,25 @@ const styles = StyleSheet.create({
   },
   statusIcon: {
     alignSelf: 'center'
+  },
+  taskRow: {
+    flexDirection: 'row',
+    backgroundColor: '#18212A',
+    height: 44,
+    paddingLeft: 10,
+    marginBottom: 2
+  },
+  taskName: {
+    flex: 1,
+    color: '#B5BBC0',
+    alignSelf: 'center',
+    fontFamily: 'Courier',
+  },
+  taskStatus: {
+    width: 44,
+    height: 44,
+    paddingTop: 14,
+    backgroundColor: '#E74C3C'
   }
 });
 
