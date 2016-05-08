@@ -3,8 +3,11 @@ import {
   AppRegistry,
   StyleSheet,
   Text,
-  View
+  View,
+  TouchableHighlight,
 } from 'react-native';
+
+import Icon from 'react-native-vector-icons/FontAwesome';
 
 const statusColors = {
   failed: '#E74C3C',
@@ -12,29 +15,50 @@ const statusColors = {
 }
 
 class BuildHeader extends Component {
+  _onPressStartJob = (jobName, build, inputs) => {
+
+  }
+
   render() {
     const {job_name, build_number, status} = this.props;
 
     return (
-      <View style={styles.page}>
-        <Text style={[styles.header, {backgroundColor: statusColors[status]}]}>
+      <View style={styles.row}>
+        <Text style={[styles.title, {backgroundColor: statusColors[status]}]}>
           {job_name} #{build_number}
         </Text>
+        <TouchableHighlight onPress={this._onPressStartJob}>
+          <View style={[styles.button, {backgroundColor: statusColors[status]}]}>
+            <Icon name="plus-circle" size={14} color="white" />
+          </View>
+        </TouchableHighlight>
       </View>
     );
   }
 }
 
 const styles = StyleSheet.create({
-  page: {
-    backgroundColor: '#273747',
+  row: {
+    flex: 1,
+    height: 50,
+    flexDirection: 'row',
   },
-  header: {
-    color: 'white',
+  title: {
+    flex: 1,
+    height: 50,
     fontSize: 14,
-    fontWeight: "700",
-    padding: 10
-  }
+    color: 'white',
+    paddingTop: 16,
+    paddingLeft: 10,
+    fontWeight: '700',
+  },
+  button: {
+    flex: 0,
+    width: 44,
+    height: 50,
+    alignItems: 'center',
+    justifyContent: 'center'
+  },
 });
 
 module.exports = BuildHeader;
