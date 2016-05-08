@@ -31,7 +31,7 @@ var NavigationBarRouteMapper = {
         onPress={() => navigator.pop()}
         style={styles.navBarLeftButton}>
         <Text style={[styles.navBarText, styles.navBarButtonText]}>
-          {previousRoute.title}
+          {`< ${route.title}`}
         </Text>
       </TouchableOpacity>
     );
@@ -42,11 +42,15 @@ var NavigationBarRouteMapper = {
   },
 
   Title: function(route, navigator, index, navState) {
-    return (
-      <Text style={[styles.navBarText, styles.navBarTitleText]}>
-        {route.title}
-      </Text>
-    );
+    if(route.kind === 'pipeline-summary') {
+      return (
+        <Text style={[styles.navBarText, styles.navBarTitleText]}>
+          {route.title}
+        </Text>
+      );
+    } else {
+      return null;
+    }
   },
 
 };

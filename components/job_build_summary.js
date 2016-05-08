@@ -6,12 +6,26 @@ import {
   View,
   ScrollView
 } from 'react-native';
-
+import moment from 'moment';
+require('moment-duration-format');
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 const BuildHeader = require('./build_header');
 
 class JobBuildSummary extends Component {
+  timeFromNow(timeFrom) {
+    let now = moment();
+    let time = moment.unix(timeFrom);
+    let timeTotalHoursAgo = now.diff(time, 'hours');
+    let timeDaysAgo = Math.floor(timeTotalHoursAgo / 24);
+    let timeHoursAgo = timeTotalHoursAgo % 24;
+    if(timeDaysAgo > 0) {
+      return `${timeDaysAgo}d ${timeHoursAgo}h`;
+    } else {
+      return `${timeHoursAgo}h`;
+    }
+  }
+
   render() {
     const {build, inputs} = this.props;
     const {start_time, end_time} = build;
@@ -30,13 +44,20 @@ class JobBuildSummary extends Component {
       );
     });
 
+
+    let startTimeReadable = this.timeFromNow(start_time);
+    let endTimeReadable = this.timeFromNow(end_time);
+    let durationReadable = moment.duration(end_time - start_time, 's').format('d(d) h(h) m(m) s(s)', {
+			escape: /\((.+?)\)/
+		});
+
     return (
       <ScrollView style={styles.container}>
         <BuildHeader job_name={build.job_name} build_number={build.name} status={build.status} />
 
-        <Text style={styles.time}>started {start_time}</Text>
-        <Text style={styles.time}>ended {end_time}</Text>
-        <Text style={styles.time}>duration {end_time - start_time}</Text>
+        <Text style={styles.time}>started {startTimeReadable} ago</Text>
+        <Text style={styles.time}>ended {endTimeReadable} ago</Text>
+        <Text style={styles.time}>duration {durationReadable}</Text>
 
         <View style={styles.inputs}>
           <Text style={styles.textHeader}>Inputs</Text>

@@ -26,10 +26,10 @@ class Jobs extends Component {
   }
 
   _onPressJobBar = (jobName, build, inputs) => {
-    const {navigator} = this.props;
+    const {navigator, pipelineName} = this.props;
 
     navigator.push({
-      title: `build #${build.name}`,
+      title: pipelineName,
       kind: 'build',
       jobName,
       build,

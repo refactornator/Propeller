@@ -29,7 +29,7 @@ class BuildHeader extends Component {
         </Text>
         <TouchableHighlight onPress={this._onPressStartJob}>
           <View style={[styles.button, {backgroundColor: statusColors[status]}]}>
-            <Icon name="plus-circle" size={14} color="white" />
+            <Icon name="plus-circle" size={20} color="white" />
           </View>
         </TouchableHighlight>
       </View>
