@@ -4,7 +4,8 @@ import {
   StyleSheet,
   Text,
   View,
-  ScrollView
+  ScrollView,
+  TouchableHighlight
 } from 'react-native';
 import moment from 'moment';
 require('moment-duration-format');
@@ -17,7 +18,8 @@ class JobBuildSummary extends Component {
     super(props);
 
     this.state = {
-      plan: {"id":"56ce208c","do":[{"id":"56ce208a","aggregate":[{"id":"56ce2088","get":{"type":"git","name":"legacy","resource":"legacy","version":{"ref":"cc824e70189fa7fe27a40be2175f06262154282b"}}},{"id":"56ce2089","get":{"type":"git","name":"ci","resource":"ci","version":{"ref":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"}}}]},{"id":"56ce208b","task":{"name":"legacy-integration","privileged":false}}]}
+      plan: {"id":"56ce208c","do":[{"id":"56ce208a","aggregate":[{"id":"56ce2088","get":{"type":"git","name":"legacy","resource":"legacy","version":{"ref":"cc824e70189fa7fe27a40be2175f06262154282b"}}},{"id":"56ce2089","get":{"type":"git","name":"ci","resource":"ci","version":{"ref":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"}}}]},{"id":"56ce208b","task":{"name":"legacy-integration","privileged":false}}]},
+      resources: {"inputs":[{"name":"legacy","resource":"legacy","type":"git","version":{"ref":"cc824e70189fa7fe27a40be2175f06262154282b"},"metadata":[{"name":"commit","value":"cc824e70189fa7fe27a40be2175f06262154282b"},{"name":"author","value":"Tim Downey"},{"name":"author_date","value":"2016-05-05 14:30:57 -0700"},{"name":"committer","value":"Alex Stupakov"},{"name":"committer_date","value":"2016-05-05 14:30:57 -0700"},{"name":"message","value":"Fix crash when viewing bill with discount line item for an ongoing app run\n\n[#118974235]\n\nSigned-off-by: Alex Stupakov \u003castupakov@pivotal.io\u003e\n"}],"pipeline_name":"main","first_occurrence":true},{"name":"ci","resource":"ci","type":"git","version":{"ref":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"},"metadata":[{"name":"commit","value":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"},{"name":"author","value":"Dominick Reinhold"},{"name":"author_date","value":"2016-05-04 10:46:33 -0700"},{"name":"committer","value":"William Lindner"},{"name":"committer_date","value":"2016-05-04 10:46:33 -0700"},{"name":"message","value":"enable the org page on a1 [#111335790]\n\nSigned-off-by: William Lindner \u003cwlindner@pivotal.io\u003e\n"}],"pipeline_name":"main","first_occurrence":false}],"outputs":[]}
     };
   }
 
@@ -34,6 +36,20 @@ class JobBuildSummary extends Component {
     }
   }
 
+  _onPressInputBar = (basicInput, build) => {
+    const {navigator} = this.props;
+    const fullInput = this.state.resources.inputs.find((inputResource) => {
+      return basicInput.name === inputResource.name;
+    });
+
+    navigator.push({
+      title: 'title',
+      kind: 'input',
+      input: fullInput,
+      build
+    });
+  }
+
   render() {
     const {build, inputs} = this.props;
     const {start_time, end_time} = build;
@@ -46,15 +62,17 @@ class JobBuildSummary extends Component {
 
     const inputViews = inputs.map((input, index) => {
       return (
-        <View key={index} style={styles.inputRow}>
-          <Icon name="arrow-down" size={14} color="#B5BBC0" style={styles.arrowIcon} />
-          <Text style={styles.inputName}>
-            {input.name}
-          </Text>
-          <View style={styles.status}>
-            <Icon name="check" size={14} color="white" style={styles.statusIcon} />
+        <TouchableHighlight key={index} onPress={this._onPressInputBar.bind(this, input, build)}>
+          <View style={styles.inputRow}>
+            <Icon name="arrow-down" size={14} color="#B5BBC0" style={styles.arrowIcon} />
+            <Text style={styles.inputName}>
+              {input.name}
+            </Text>
+            <View style={styles.status}>
+              <Icon name="check" size={14} color="white" style={styles.statusIcon} />
+            </View>
           </View>
-        </View>
+        </TouchableHighlight>
       );
     });
 
