@@ -25,13 +25,15 @@ class Jobs extends Component {
     }
   }
 
-  _onPressJobBar = (jobName, build) => {
+  _onPressJobBar = (jobName, build, inputs) => {
     const {navigator} = this.props;
 
     navigator.push({
       title: `build #${build.name}`,
       kind: 'build',
-      jobName
+      jobName,
+      build,
+      inputs
     });
   }
 
@@ -43,7 +45,7 @@ class Jobs extends Component {
     }).map((job) => {
       return (
         <View key={job.name}>
-          <TouchableHighlight onPress={this._onPressJobBar.bind(this, job.name, job.finished_build)}>
+          <TouchableHighlight onPress={this._onPressJobBar.bind(this, job.name, job.finished_build, job.inputs)}>
             <View key={job.name} style={styles.jobBar} onPress={this._onPressJobBar}>
               <Icon style={styles.jobBarIcon} name="times" size={16} color="white" /><Text style={styles.jobName}>{job.name}</Text>
             </View>

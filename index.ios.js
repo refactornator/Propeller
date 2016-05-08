@@ -16,6 +16,7 @@ import {
 } from 'react-native';
 
 import PipelineSummary from './components/pipeline_summary';
+import JobBuildSummary from './components/job_build_summary';
 
 var NavigationBarRouteMapper = {
 
@@ -64,8 +65,10 @@ class SingleProp extends Component {
             return (
               <PipelineSummary navigator={navigator} pipelines={pipelines} />
             );
-          } else if(route.kind === 'job') {
-
+          } else if(route.kind === 'build') {
+            return (
+              <JobBuildSummary build={route.build} inputs={route.inputs} />
+            )
           }
         }}
         navigationBar={
