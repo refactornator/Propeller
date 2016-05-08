@@ -95,11 +95,13 @@ const styles = StyleSheet.create({
     backgroundColor: '#19252F',
   },
   navBarText: {
+    fontFamily: 'Courier',
     fontSize: 16,
     marginVertical: 10,
   },
   navBarTitleText: {
     color: 'white',
+    fontFamily: 'Courier',
     fontWeight: '500',
     marginVertical: 9,
   },

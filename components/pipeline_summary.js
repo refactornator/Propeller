@@ -105,6 +105,7 @@ const styles = StyleSheet.create({
   },
   pipelineName: {
     flex: 1,
+    fontFamily: 'Courier',
     color: 'white',
     paddingLeft: 10,
     alignSelf: 'center'
@@ -133,6 +134,7 @@ const styles = StyleSheet.create({
   },
   jobName: {
     color: 'white',
+    fontFamily: 'Courier',
     paddingLeft: 10
   },
 });

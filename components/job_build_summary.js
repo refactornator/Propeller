@@ -81,12 +81,14 @@ const styles = StyleSheet.create({
     margin: 3,
     marginLeft: 10,
     padding: 3,
-    paddingLeft: 0
+    paddingLeft: 0,
+    fontFamily: 'Courier',
   },
   textHeader: {
     color: 'white',
     padding: 10,
-    paddingBottom: 5
+    paddingBottom: 5,
+    fontFamily: 'Courier',
   },
   inputs: {
     backgroundColor: '#34495E'
@@ -96,6 +98,7 @@ const styles = StyleSheet.create({
     paddingLeft: 4,
     color: '#B5BBC0',
     alignSelf: 'center',
+    fontFamily: 'Courier',
   },
   inputRow: {
     flexDirection: 'row',

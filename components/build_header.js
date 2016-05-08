@@ -51,6 +51,7 @@ const styles = StyleSheet.create({
     paddingTop: 16,
     paddingLeft: 10,
     fontWeight: '700',
+    fontFamily: 'Courier',
   },
   button: {
     flex: 0,
