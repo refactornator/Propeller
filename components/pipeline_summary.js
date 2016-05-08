@@ -15,17 +15,16 @@ class PipelineSummary extends Component {
     const {pipelines} = this.props;
 
     const pipelineViews = pipelines.map((pipeline) => {
-
-    return (
-      <View key={pipeline.name} style={styles.pipelineRow}>
-        <Text style={styles.pipelineName}>{pipeline.name}</Text>
-        <TouchableHighlight onPress={this._onPressButton}>
-          <View style={[styles.button, styles.paused]}>
-            <Icon name="play" size={16} color="white" />
-          </View>
-        </TouchableHighlight>
-      </View>
-    );
+      return (
+        <View key={pipeline.name} style={styles.pipelineRow}>
+          <Text style={styles.pipelineName}>{pipeline.name}</Text>
+          <TouchableHighlight onPress={this._onPressButton}>
+            <View style={[styles.button, styles.paused]}>
+              <Icon name="play" size={16} color="white" />
+            </View>
+          </TouchableHighlight>
+        </View>
+      );
     });
 
     return (
