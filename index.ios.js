@@ -37,15 +37,7 @@ var NavigationBarRouteMapper = {
   },
 
   RightButton: function(route, navigator, index, navState) {
-    return (
-      <TouchableOpacity
-        onPress={() => navigator.push(newRandomRoute())}
-        style={styles.navBarRightButton}>
-        <Text style={[styles.navBarText, styles.navBarButtonText]}>
-          Next
-        </Text>
-      </TouchableOpacity>
-    );
+    return null;
   },
 
   Title: function(route, navigator, index, navState) {
@@ -66,10 +58,16 @@ class SingleProp extends Component {
       <Navigator
         debugOverlay={false}
         style={styles.appContainer}
-        initialRoute={{title: 'Pipeline Summary'}}
-        renderScene={(route, navigator) => (
-          <PipelineSummary pipelines={pipelines} />
-        )}
+        initialRoute={{title: 'Pipeline Summary', kind: 'pipeline-summary'}}
+        renderScene={(route, navigator) => {
+          if(route.kind === 'pipeline-summary') {
+            return (
+              <PipelineSummary navigator={navigator} pipelines={pipelines} />
+            );
+          } else if(route.kind === 'job') {
+
+          }
+        }}
         navigationBar={
           <Navigator.NavigationBar
             routeMapper={NavigationBarRouteMapper}
