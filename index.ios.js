@@ -66,7 +66,7 @@ class SingleProp extends Component {
       <Navigator
         debugOverlay={false}
         style={styles.appContainer}
-        initialRoute={{ title: 'Pipeline Summary' }}
+        initialRoute={{title: 'Pipeline Summary'}}
         renderScene={(route, navigator) => (
           <PipelineSummary pipelines={pipelines} />
         )}

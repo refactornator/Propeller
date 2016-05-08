@@ -8,19 +8,24 @@ import {
   TouchableHighlight,
 } from 'react-native';
 
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 class PipelineSummary extends Component {
   render() {
     const {pipelines} = this.props;
 
     const pipelineViews = pipelines.map((pipeline) => {
-      return (
-        <View key={pipeline.name} style={styles.pipelineRow}>
-          <Text style={styles.pipelineName}>{pipeline.name}</Text>
-          <TouchableHighlight onPress={this._onPressButton}>
-            <Text style={[styles.button, styles.paused]}>Play</Text>
-          </TouchableHighlight>
-        </View>
-      );
+
+    return (
+      <View key={pipeline.name} style={styles.pipelineRow}>
+        <Text style={styles.pipelineName}>{pipeline.name}</Text>
+        <TouchableHighlight onPress={this._onPressButton}>
+          <View style={[styles.button, styles.paused]}>
+            <Icon name="play" size={16} color="white" />
+          </View>
+        </TouchableHighlight>
+      </View>
+    );
     });
 
     return (
@@ -52,8 +57,8 @@ const styles = StyleSheet.create({
   button: {
     width: 44,
     height: 44,
-    color: 'white',
-    alignSelf: 'center'
+    alignItems: 'center',
+    justifyContent: 'center'
   },
   paused: {
     backgroundColor: '#3498DB'
