@@ -50,6 +50,17 @@ class JobBuildSummary extends Component {
     });
   }
 
+  _onPressTaskBar = (task) => {
+    const {navigator, build} = this.props;
+
+    navigator.push({
+      title: 'title',
+      kind: 'task',
+      build,
+      task,
+    });
+  }
+
   render() {
     const {build, inputs} = this.props;
     const {start_time, end_time} = build;
@@ -76,14 +87,19 @@ class JobBuildSummary extends Component {
       );
     });
 
-    const task = this.state.plan.do[1];
+    const task = {
+      id: this.state.plan.do[1].id,
+      name: this.state.plan.do[1].task.name
+    };
     const taskView = (
-      <View key={task.id} style={styles.taskRow}>
-        <Text style={styles.taskName}>{task.task.name}</Text>
-        <View style={styles.taskStatus}>
-          <Icon name="times" size={14} color="white" style={styles.statusIcon} />
+      <TouchableHighlight onPress={this._onPressTaskBar.bind(this, task)}>
+        <View key={task.id} style={styles.taskRow}>
+          <Text style={styles.taskName}>{task.name}</Text>
+          <View style={styles.taskStatus}>
+            <Icon name="times" size={14} color="white" style={styles.statusIcon} />
+          </View>
         </View>
-      </View>
+      </TouchableHighlight>
     );
 
     return (

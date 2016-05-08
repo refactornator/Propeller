@@ -18,6 +18,7 @@ import {
 import PipelineSummary from './components/pipeline_summary';
 import JobBuildSummary from './components/job_build_summary';
 import InputDetails from './components/input_details';
+import TaskDetails from './components/task_details';
 
 var NavigationBarRouteMapper = {
 
@@ -77,6 +78,10 @@ class SingleProp extends Component {
           } else if(route.kind === 'input') {
             return (
               <InputDetails navigator={navigator} build={route.build} input={route.input} />
+            )
+          } else if(route.kind === 'task') {
+            return (
+              <TaskDetails navigator={navigator} build={route.build} task={route.task} />
             )
           }
         }}
