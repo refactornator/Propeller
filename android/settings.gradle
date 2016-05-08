@@ -1,0 +1,3 @@
+rootProject.name = 'SingleProp'
+
+include ':app'
