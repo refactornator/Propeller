@@ -13,12 +13,19 @@ import {
   Navigator,
   TouchableOpacity,
   StatusBar,
+  AsyncStorage,
 } from 'react-native';
 
+import Concourse from './api/concourse';
+
+import Login from './components/login';
 import PipelineSummary from './components/pipeline_summary';
 import JobBuildSummary from './components/job_build_summary';
 import InputDetails from './components/input_details';
 import TaskDetails from './components/task_details';
+
+let HOST_STORAGE_KEY = '@Propeller:HOST';
+let TOKEN_STORAGE_KEY = '@Propeller:TOKEN';
 
 var NavigationBarRouteMapper = {
 
@@ -58,8 +65,47 @@ var NavigationBarRouteMapper = {
 };
 
 class SingleProp extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {loggedIn: false};
+    try {
+      AsyncStorage.multiGet([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY], (error, stores) => {
+        let host, token;
+        stores.forEach((store) => {
+          let key = store[0];
+          let value = store[1];
+          if(key === HOST_STORAGE_KEY) {
+            host = value;
+          } else if (key === TOKEN_STORAGE_KEY) {
+            token = value;
+          }
+        });
+        if(host && token) {
+          this.login(host, token);
+        } else {
+          console.log('not currently logged in');
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  login = (host, token) => {
+    this.concourse = new Concourse(host, token);
+    this.concourse.fetchPipelines().then((response) => {
+      return response.json();
+    }).then((pipelines) => {
+      this.setState({loggedIn: true, pipelines});
+      return AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]);
+    }).catch((error) => {
+      console.log(error);
+    });
+  };
+
   render() {
-    let pipelines = [{"name":"main","url":"/pipelines/main","paused":false,"groups":[{"name":"apps-manager","jobs":["legacy-unit","legacy-deployment-pcf","legacy-integration-pcf","js-unit","js-deployment-pcf","js-integration-pcf","usage-unit","usage-deployment-pcf","usage-integration-pcf","create-pcf-release","js-deployment-pws-a1","js-deployment-pws-a1-edge","js-deployment-pws-prod"]},{"name":"docker","jobs":["build-base-docker-image","build-final-docker-image"],"resources":["apps-manager-base-dockerfile","apps-manager-final-dockerfile","apps-manager-js-base-docker-image","apps-manager-js-final-docker-image","apps-manager-js-package-json","legacy-gemfile","app-usage-service-gemfile","ubuntu-14.04"]}]},{"name":"salmon","url":"/pipelines/salmon","paused":false,"groups":[{"name":"salmon/example-aws","jobs":["build-runtime","acquire-environment-from-clean","manually-release-environment-to-dirty","upload-pivotal","configure-ert","import-stemcell","deploy-ert","run-cats"]},{"name":"housekeeping","jobs":["soil-unclaimed-clean-environments","acquire-environment-from-dirty","destroy-environment","deploy-ops-manager","configure-microbosh","deploy-microbosh","release-environment-to-clean"]}]},{"name":"environments","url":"/pipelines/environments","paused":false,"groups":[{"name":"mrblue","jobs":["mrblue-cloudformation","mrblue-bosh-deploy","mrblue-cf-deploy","mrblue-bosh-cleanup"]}]},{"name":"build-docker-image","url":"/pipelines/build-docker-image","paused":false,"groups":[{"name":"Docker Image Generation","jobs":["create-docker-image"]}]},{"name":"legacy","url":"/pipelines/legacy","paused":false}];
+    let {pipelines} = this.state;
 
     return (
       <Navigator
@@ -67,9 +113,15 @@ class SingleProp extends Component {
         style={styles.appContainer}
         initialRoute={{title: 'Pipeline Summary', kind: 'pipeline-summary'}}
         renderScene={(route, navigator) => {
+          if(!this.state.loggedIn) {
+            return (
+              <Login onLogin={this.login} />
+            );
+          }
+
           if(route.kind === 'pipeline-summary') {
             return (
-              <PipelineSummary navigator={navigator} pipelines={pipelines} />
+              <PipelineSummary concourse={this.concourse} navigator={navigator} pipelines={pipelines} />
             );
           } else if(route.kind === 'build') {
             return (
