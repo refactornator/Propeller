@@ -64,7 +64,7 @@ var NavigationBarRouteMapper = {
 
 };
 
-class SingleProp extends Component {
+class Propeller extends Component {
   constructor(props) {
     super(props);
 
@@ -180,4 +180,4 @@ const styles = StyleSheet.create({
 
 StatusBar.setBarStyle('light-content', true);
 
-AppRegistry.registerComponent('SingleProp', () => SingleProp);
+AppRegistry.registerComponent('Propeller', () => Propeller);

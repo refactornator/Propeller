@@ -11,7 +11,7 @@ import {
   View
 } from 'react-native';
 
-class SingleProp extends Component {
+class Propeller extends Component {
   render() {
     return (
       <View style={styles.container}>
@@ -48,4 +48,4 @@ const styles = StyleSheet.create({
   },
 });
 
-AppRegistry.registerComponent('SingleProp', () => SingleProp);
+AppRegistry.registerComponent('Propeller', () => Propeller);
