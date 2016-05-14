@@ -125,15 +125,15 @@ class SingleProp extends Component {
             );
           } else if(route.kind === 'build') {
             return (
-              <JobBuildSummary navigator={navigator} build={route.build} inputs={route.inputs} />
+              <JobBuildSummary concourse={this.concourse} navigator={navigator} build={route.build} inputs={route.inputs} />
             )
           } else if(route.kind === 'input') {
             return (
-              <InputDetails navigator={navigator} build={route.build} input={route.input} />
+              <InputDetails concourse={this.concourse} navigator={navigator} build={route.build} input={route.input} />
             )
           } else if(route.kind === 'task') {
             return (
-              <TaskDetails navigator={navigator} build={route.build} task={route.task} />
+              <TaskDetails concourse={this.concourse} navigator={navigator} build={route.build} task={route.task} />
             )
           }
         }}

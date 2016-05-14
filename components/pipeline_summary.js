@@ -20,7 +20,7 @@ class Jobs extends Component {
       this.setState({jobs});
     });
 
-    this.state = { jobs: [] };
+    this.state = {jobs: []};
   }
 
   _onPressJobBar = (jobName, build, inputs) => {

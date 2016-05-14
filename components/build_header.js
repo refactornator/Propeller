@@ -15,19 +15,21 @@ const statusColors = {
 }
 
 class BuildHeader extends Component {
-  _onPressStartJob = (jobName, build, inputs) => {
-
+  _onPressStartJob = (event) => {
+    const {concourse} = this.props;
+    const {job_name, pipeline_name} = this.props.build;
+    concourse.startBuild(pipeline_name, job_name);
   }
 
   render() {
-    const {job_name, build_number, status} = this.props;
+    const {job_name, build_number, status} = this.props.build;
 
     return (
       <View style={styles.row}>
         <Text style={[styles.title, {backgroundColor: statusColors[status]}]}>
           {job_name} #{build_number}
         </Text>
-        <TouchableHighlight onPress={this._onPressStartJob}>
+        <TouchableHighlight onPress={this._onPressStartJob.bind(this)}>
           <View style={[styles.button, {backgroundColor: statusColors[status]}]}>
             <Icon name="plus-circle" size={20} color="white" />
           </View>

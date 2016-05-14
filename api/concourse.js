@@ -1,9 +1,12 @@
+import EventSource from 'react-native-eventsource';
+
 let json = (response) => {
   return response.json();
 };
 
 class Concourse {
   constructor(host, token) {
+    this.host = host;
     this.endpoint = `${host}/api/v1`;
     this.cookie = `ATC-Authorization=Basic ${token}`;
     this.baseOptions = {
@@ -41,15 +44,19 @@ class Concourse {
   }
 
   fetchBuildPlan(buildId) {
-    return fetch(`${this.endpoint}/builds/${buildId}/plan`, this.baseOptions);
+    return fetch(`${this.endpoint}/builds/${buildId}/plan`, this.baseOptions).then(json);
   }
 
   fetchBuildResources(buildId) {
-    return fetch(`${this.endpoint}/builds/${buildId}/resources`, this.baseOptions);
+    return fetch(`${this.endpoint}/builds/${buildId}/resources`, this.baseOptions).then(json);
   }
 
   fetchBuildEvents(buildId) {
     return fetch(`${this.endpoint}/builds/${buildId}/events`, this.baseOptions);
+  }
+
+  startBuild(pipeline, job) {
+    return fetch(`${this.host}/pipelines/${pipeline}/jobs/${job}/builds`, Object.assign({}, this.baseOptions, {method: 'POST'}));
   }
 
   pause(pipeline) {
@@ -58,6 +65,10 @@ class Concourse {
 
   unpause(pipeline) {
     return fetch(`${this.endpoint}/pipelines/${pipeline}/unpause`, Object.assign({}, this.baseOptions, {method: 'PUT'}));
+  }
+
+  initEventSourceForBuild(buildId) {
+    return new EventSource(`${this.endpoint}/builds/${buildId}/events`, this.cookie);
   }
 }
 

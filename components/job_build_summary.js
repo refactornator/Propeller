@@ -16,11 +16,24 @@ const BuildHeader = require('./build_header');
 class JobBuildSummary extends Component {
   constructor(props) {
     super(props);
+    const {concourse, build} = props;
+    const buildId = build.id;
 
     this.state = {
-      plan: {"id":"56ce208c","do":[{"id":"56ce208a","aggregate":[{"id":"56ce2088","get":{"type":"git","name":"legacy","resource":"legacy","version":{"ref":"cc824e70189fa7fe27a40be2175f06262154282b"}}},{"id":"56ce2089","get":{"type":"git","name":"ci","resource":"ci","version":{"ref":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"}}}]},{"id":"56ce208b","task":{"name":"legacy-integration","privileged":false}}]},
-      resources: {"inputs":[{"name":"legacy","resource":"legacy","type":"git","version":{"ref":"cc824e70189fa7fe27a40be2175f06262154282b"},"metadata":[{"name":"commit","value":"cc824e70189fa7fe27a40be2175f06262154282b"},{"name":"author","value":"Tim Downey"},{"name":"author_date","value":"2016-05-05 14:30:57 -0700"},{"name":"committer","value":"Alex Stupakov"},{"name":"committer_date","value":"2016-05-05 14:30:57 -0700"},{"name":"message","value":"Fix crash when viewing bill with discount line item for an ongoing app run\n\n[#118974235]\n\nSigned-off-by: Alex Stupakov \u003castupakov@pivotal.io\u003e\n"}],"pipeline_name":"main","first_occurrence":true},{"name":"ci","resource":"ci","type":"git","version":{"ref":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"},"metadata":[{"name":"commit","value":"6a3ba2049dfc576abb13fab927a7d4f82fb5978d"},{"name":"author","value":"Dominick Reinhold"},{"name":"author_date","value":"2016-05-04 10:46:33 -0700"},{"name":"committer","value":"William Lindner"},{"name":"committer_date","value":"2016-05-04 10:46:33 -0700"},{"name":"message","value":"enable the org page on a1 [#111335790]\n\nSigned-off-by: William Lindner \u003cwlindner@pivotal.io\u003e\n"}],"pipeline_name":"main","first_occurrence":false}],"outputs":[]}
+      plan: {},
+      resources: {
+        'inputs': [],
+        'outputs': []
+      }
     };
+
+    concourse.fetchBuildPlan(buildId).then((plan) => {
+      this.setState({plan: plan.plan});
+    });
+
+    concourse.fetchBuildResources(buildId).then((resources) => {
+      this.setState({resources});
+    });
   }
 
   timeFromNow(timeFrom) {
@@ -62,7 +75,7 @@ class JobBuildSummary extends Component {
   }
 
   render() {
-    const {build, inputs} = this.props;
+    const {concourse, build, inputs} = this.props;
     const {start_time, end_time} = build;
 
     let startTimeReadable = this.timeFromNow(start_time);
@@ -87,24 +100,29 @@ class JobBuildSummary extends Component {
       );
     });
 
-    const task = {
-      id: this.state.plan.do[1].id,
-      name: this.state.plan.do[1].task.name
-    };
-    const taskView = (
-      <TouchableHighlight onPress={this._onPressTaskBar.bind(this, task)}>
-        <View key={task.id} style={styles.taskRow}>
-          <Text style={styles.taskName}>{task.name}</Text>
-          <View style={styles.taskStatus}>
-            <Icon name="times" size={14} color="white" style={styles.statusIcon} />
+    let taskView;
+    if(this.state.plan.do) {
+      const task = {
+        id: this.state.plan.do[1].id,
+        name: this.state.plan.do[1].task.name
+      };
+      taskView = (
+        <TouchableHighlight onPress={this._onPressTaskBar.bind(this, task)}>
+          <View key={task.id} style={styles.taskRow}>
+            <Text style={styles.taskName}>{task.name}</Text>
+            <View style={styles.taskStatus}>
+              <Icon name="times" size={14} color="white" style={styles.statusIcon} />
+            </View>
           </View>
-        </View>
-      </TouchableHighlight>
-    );
+        </TouchableHighlight>
+      );
+    } else {
+      taskView = null;
+    }
 
     return (
       <ScrollView style={styles.container}>
-        <BuildHeader job_name={build.job_name} build_number={build.name} status={build.status} />
+        <BuildHeader concourse={concourse} build={build} />
 
         <Text style={styles.time}>started {startTimeReadable} ago</Text>
         <Text style={styles.time}>ended {endTimeReadable} ago</Text>

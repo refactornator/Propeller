@@ -12,7 +12,7 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 class InputDetails extends Component {
   render() {
-    const {input, build} = this.props;
+    const {concourse, input, build} = this.props;
 
     const metadata = input.metadata.map((line, i) => {
       return (
@@ -25,7 +25,7 @@ class InputDetails extends Component {
 
     return (
       <ScrollView style={styles.container}>
-        <BuildHeader job_name={build.job_name} build_number={build.name} status={build.status} />
+        <BuildHeader concourse={this.concourse} build={build} />
         <View style={styles.jobBar}>
           <Text style={styles.input}>{input.name}</Text>
           <Icon style={styles.jobBarIcon} name="check" size={16} color="white" />
