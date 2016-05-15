@@ -133,7 +133,7 @@ class Propeller extends Component {
             )
           } else if(route.kind === 'task') {
             return (
-              <TaskDetails concourse={this.concourse} navigator={navigator} build={route.build} task={route.task} />
+              <TaskDetails concourse={this.concourse} navigator={navigator} build={route.build} task={route.task} messages={route.messages} />
             )
           }
         }}

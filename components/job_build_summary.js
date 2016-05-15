@@ -5,7 +5,8 @@ import {
   Text,
   View,
   ScrollView,
-  TouchableHighlight
+  TouchableHighlight,
+  ActivityIndicatorIOS
 } from 'react-native';
 import moment from 'moment';
 require('moment-duration-format');
@@ -20,19 +21,46 @@ class JobBuildSummary extends Component {
     const buildId = build.id;
 
     this.state = {
-      plan: {},
+      task: {},
       resources: {
         'inputs': [],
         'outputs': []
-      }
+      },
+      messages: []
     };
-
-    concourse.fetchBuildPlan(buildId).then((plan) => {
-      this.setState({plan: plan.plan});
-    });
 
     concourse.fetchBuildResources(buildId).then((resources) => {
       this.setState({resources});
+    });
+
+    concourse.fetchBuildPlan(buildId).then((plan) => {
+      const task = {
+        id: plan.plan.do[1].id,
+        name: plan.plan.do[1].task.name,
+        status: null
+      };
+      let eventSource = concourse.initEventSourceForBuild(buildId);
+      eventSource.onopen = () => {
+        console.log('EventSource::onopen');
+      };
+      eventSource.onmessage = (event) => {
+        let message;
+        try {
+          message = JSON.parse(event.message);
+
+          if (message.event === 'finish-task') {
+            if(task.id === message.data.origin.id) {
+              const newTask = Object.assign({}, task, {status: message.data.exit_status});
+              this.setState({task: newTask});
+            }
+          }
+
+          this.setState({messages: this.state.messages.concat([message])});
+        } catch(error) {
+          console.log(error);
+        }
+      };
+      this.setState({task, eventSource});
     });
   }
 
@@ -56,7 +84,7 @@ class JobBuildSummary extends Component {
     });
 
     navigator.push({
-      title: 'title',
+      title: 'logs',
       kind: 'input',
       input: fullInput,
       build
@@ -65,16 +93,19 @@ class JobBuildSummary extends Component {
 
   _onPressTaskBar = (task) => {
     const {navigator, build} = this.props;
+    const {messages} = this.state;
 
     navigator.push({
-      title: 'title',
+      title: 'logs',
       kind: 'task',
+      messages,
       build,
       task,
     });
   }
 
   render() {
+    const {task} = this.state;
     const {concourse, build, inputs} = this.props;
     const {start_time, end_time} = build;
 
@@ -93,7 +124,7 @@ class JobBuildSummary extends Component {
               {input.name}
             </Text>
             <View style={styles.status}>
-              <Icon name="check" size={14} color="white" style={styles.statusIcon} />
+              <Icon name="check" size={14} color="#1DC762" style={styles.statusIcon} />
             </View>
           </View>
         </TouchableHighlight>
@@ -101,17 +132,15 @@ class JobBuildSummary extends Component {
     });
 
     let taskView;
-    if(this.state.plan.do) {
-      const task = {
-        id: this.state.plan.do[1].id,
-        name: this.state.plan.do[1].task.name
-      };
+    if(task) {
       taskView = (
         <TouchableHighlight onPress={this._onPressTaskBar.bind(this, task)}>
           <View key={task.id} style={styles.taskRow}>
             <Text style={styles.taskName}>{task.name}</Text>
             <View style={styles.taskStatus}>
-              <Icon name="times" size={14} color="white" style={styles.statusIcon} />
+              {task.status === null ? <ActivityIndicatorIOS animating={true} style={[styles.centering, {paddingRight: 10}]} size="small" /> : null}
+              {task.status === 0 ? <Icon name="check" size={14} color="#1DC762" style={styles.statusIcon} /> : null}
+              {task.status === 1 ? <Icon name="times" size={14} color="#E74C3C" style={styles.statusIcon} /> : null}
             </View>
           </View>
         </TouchableHighlight>
@@ -145,6 +174,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 64,
     backgroundColor: '#273747',
+  },
+  centering: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   time: {
     color: 'white',
@@ -183,8 +216,7 @@ const styles = StyleSheet.create({
   status: {
     width: 44,
     height: 44,
-    paddingTop: 14,
-    backgroundColor: '#1DC762'
+    paddingTop: 14
   },
   statusIcon: {
     alignSelf: 'center'
@@ -205,8 +237,7 @@ const styles = StyleSheet.create({
   taskStatus: {
     width: 44,
     height: 44,
-    paddingTop: 14,
-    backgroundColor: '#E74C3C'
+    paddingTop: 14
   }
 });
 

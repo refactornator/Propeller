@@ -22,12 +22,12 @@ class BuildHeader extends Component {
   }
 
   render() {
-    const {job_name, build_number, status} = this.props.build;
+    const {job_name, name, status} = this.props.build;
 
     return (
       <View style={styles.row}>
         <Text style={[styles.title, {backgroundColor: statusColors[status]}]}>
-          {job_name} #{build_number}
+          {job_name} #{name}
         </Text>
         <TouchableHighlight onPress={this._onPressStartJob.bind(this)}>
           <View style={[styles.button, {backgroundColor: statusColors[status]}]}>

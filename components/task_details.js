@@ -17,61 +17,35 @@ var ansi_up = require('ansi_up');
 class TaskDetails extends Component {
   constructor(props) {
     super(props);
-    const {concourse, build, task} = props;
+    const {concourse, messages, build, task} = props;
     const buildId = build.id;
 
-    this.tempLogs = '';
+    let tempLogs = messages.map((message) => {
+      if(message.event === 'log') {
+        if(task.id === message.data.origin.id) {
+          let payload = message.data.payload.replace(new RegExp('\\r\\r', 'g'), '');
+          let logline = ansi_up.ansi_to_html(ansi_up.escape_for_html(payload));
+          return logline;
+        }
+      }
+    });
 
-    let eventSource = concourse.initEventSourceForBuild(buildId);
+    const html = `<html><body style='padding:10px; font-size:26px; font-weight:normal; line-height:1.4; color:#E6E7E8; background-color:#273747; font-family:monospace;'><pre>${tempLogs.join('')}</pre></body></html>`;
 
     this.state = {
-      logs: [],
-      html: ''
+      html
     };
-
-    eventSource.onopen = () => {
-      console.log('EventSource::onopen');
-    };
-
-    eventSource.onmessage = (e) => {
-      let message;
-      try {
-        message = JSON.parse(e.message);
-
-        if(message.event === 'log') {
-          if(task.id === message.data.origin.id) {
-            let payload = message.data.payload.replace(new RegExp('\\r\\r', 'g'), '');
-            let logline = ansi_up.ansi_to_html(ansi_up.escape_for_html(payload));
-            this.tempLogs += logline;
-            //.replace(new RegExp('\\n', '<br />'), '\n');
-            // this.tempLogs.push(message.data.payload);
-          }
-        }
-      } catch(error) {
-        console.log(error);
-      }
-    };
-
-    eventSource.onerror = this._handleCloseEvent.bind(this);
   }
 
   _handleCloseEvent = (e) => {
-    console.log('EventSource::onerror: ', e);
-    let html = `<html><body style='padding:10px; font-size:26px; font-weight:normal; line-height:1.4; color:#E6E7E8; background-color:#273747; font-family:monospace;'><pre>${this.tempLogs}</pre></body></html>`;
-    console.log(html);
-    this.setState({html});
   }
 
   render() {
     const {concourse, task, build} = this.props;
 
-    const {html, logs} = this.state;
+    const {html} = this.state;
 
-    const logViews = logs.map((log, index) => {
-      return (
-        <Text key={index} style={styles.logLine}>{log}</Text>
-      );
-    });
+    console.log(html);
 
     return (
       <View style={styles.container}>
@@ -80,7 +54,9 @@ class TaskDetails extends Component {
           <View style={styles.taskBar}>
             <Text style={styles.taskName}>{task.name}</Text>
             <View style={styles.taskStatus}>
-              <Icon name="times" size={14} color="white" style={styles.statusIcon} />
+              {task.status === null ? <ActivityIndicatorIOS animating={true} style={[styles.centering, {paddingRight: 10}]} size="small" /> : null}
+              {task.status === 0 ? <Icon name="check" size={14} color="#1DC762" style={styles.statusIcon} /> : null}
+              {task.status === 1 ? <Icon name="times" size={14} color="#E74C3C" style={styles.statusIcon} /> : null}
             </View>
           </View>
         </View>
@@ -126,8 +102,7 @@ const styles = StyleSheet.create({
     width: 44,
     height: 43,
     marginTop: 1,
-    paddingTop: 13,
-    backgroundColor: '#E74C3C'
+    paddingTop: 13
   },
   statusIcon: {
     alignSelf: 'center'
