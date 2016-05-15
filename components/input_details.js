@@ -10,6 +10,14 @@ import {
 import BuildHeader from './build_header';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+const statusColors = {
+  failed: '#E74C3C',
+  paused: '#E74C3C',
+  aborted: '#8F4B2D',
+  errored: '#E67E22',
+  succeeded: '#2ECC71'
+}
+
 class InputDetails extends Component {
   render() {
     const {concourse, input, build} = this.props;
@@ -28,7 +36,8 @@ class InputDetails extends Component {
         <BuildHeader concourse={this.concourse} build={build} />
         <View style={styles.jobBar}>
           <Text style={styles.input}>{input.name}</Text>
-          <Icon style={styles.jobBarIcon} name="check" size={16} color="white" />
+          {input.status === 'succeeded' ? <Icon name="check" size={14} color={statusColors[input.status]} style={styles.jobBarIcon} /> : null}
+          {input.status === 'failed' ? <Icon name="times" size={14} color={statusColors[input.status]} style={styles.jobBarIcon} /> : null}
         </View>
         <View style={{padding: 10}}>
           <Text style={styles.details}>ref {input.version.ref}</Text>
@@ -73,9 +82,7 @@ const styles = StyleSheet.create({
     flex: 0,
     width: 44,
     height: 44,
-    color: 'white',
-    padding: 14,
-    backgroundColor: '#2FCC71'
+    padding: 14
   },
   details: {
     color: 'white',

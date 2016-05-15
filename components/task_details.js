@@ -14,6 +14,14 @@ import BuildHeader from './build_header';
 
 var ansi_up = require('ansi_up');
 
+const statusColors = {
+  failed: '#E74C3C',
+  paused: '#E74C3C',
+  aborted: '#8F4B2D',
+  errored: '#E67E22',
+  succeeded: '#2ECC71'
+}
+
 class TaskDetails extends Component {
   constructor(props) {
     super(props);
@@ -50,8 +58,10 @@ class TaskDetails extends Component {
             <Text style={styles.taskName}>{task.name}</Text>
             <View style={styles.taskStatus}>
               {task.status === null ? <ActivityIndicatorIOS animating={true} style={[styles.centering, {paddingRight: 10}]} size="small" /> : null}
-              {task.status === 0 ? <Icon name="check" size={14} color="#1DC762" style={styles.statusIcon} /> : null}
-              {task.status === 1 ? <Icon name="times" size={14} color="#E74C3C" style={styles.statusIcon} /> : null}
+              {task.status === 'errored' ? <Icon name="exclamation-triangle" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null }
+              {task.status === 'aborted' ? <Icon name="ban" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null }
+              {task.status === 'succeeded' ? <Icon name="check" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null}
+              {task.status === 'failed' ? <Icon name="times" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null}
             </View>
           </View>
         </View>
