@@ -17,7 +17,7 @@ class Concourse {
   }
 
   fetchPipelines() {
-    return fetch(`${this.endpoint}/pipelines`, this.baseOptions);
+    return fetch(`${this.endpoint}/pipelines`, this.baseOptions).then(json);
   }
 
   fetchJobs(pipelineName) {

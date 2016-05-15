@@ -4,10 +4,11 @@ import {
   Text,
   View,
   Navigator,
-  ScrollView,
   TouchableHighlight,
   ActivityIndicatorIOS,
 } from 'react-native';
+
+import GiftedListView from 'react-native-gifted-listview';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -101,21 +102,43 @@ class Pipeline extends Component {
 }
 
 class PipelineSummary extends Component {
-  render() {
-    const {navigator, pipelines} = this.props;
-
-    const pipelineViews = pipelines.map((pipeline) => {
-      return (
-        <View key={pipeline.name}>
-          <Pipeline concourse={this.props.concourse} navigator={navigator} pipeline={pipeline} />
-        </View>
-      );
+  onRefresh(page, callback, options) {
+    this.props.refreshPipelines().then(pipelines => {
+      callback(pipelines);
     });
+  }
+
+  renderRow(pipeline) {
+    const {concourse, navigator} = this.props;
 
     return (
-      <ScrollView style={styles.container}>
-        {pipelineViews}
-      </ScrollView>
+      <View key={pipeline.name}>
+        <Pipeline concourse={concourse} navigator={navigator} pipeline={pipeline} />
+      </View>
+    );
+  }
+
+  render() {
+    const {pipelines} = this.props;
+
+    return (
+      <View style={styles.container}>
+        <GiftedListView
+          rowView={this.renderRow.bind(this)}
+          onFetch={this.onRefresh.bind(this)}
+          firstLoader={true} // display a loader for the first fetching
+          pagination={false} // enable infinite scrolling using touch to load more
+          refreshable={true} // enable pull-to-refresh for iOS and touch-to-refresh for Android
+          withSections={false} // enable sections
+          enableEmptySections={true}
+          customStyles={{
+            paginationView: {
+              backgroundColor: '#273747'
+            }
+          }}
+          refreshableTintColor="white"
+        />
+      </View>
     );
   }
 }

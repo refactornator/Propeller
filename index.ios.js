@@ -92,15 +92,18 @@ class Propeller extends Component {
     }
   }
 
+  refreshPipelines() {
+    return this.concourse.fetchPipelines().then(pipelines => {
+      this.setState({pipelines});
+      return pipelines;
+    });
+  }
+
   login = (host, token) => {
     this.concourse = new Concourse(host, token);
-    this.concourse.fetchPipelines().then((response) => {
-      return response.json();
-    }).then((pipelines) => {
-      this.setState({loggedIn: true, pipelines});
+    this.setState({loggedIn: true});
+    this.refreshPipelines().then(() => {
       return AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]);
-    }).catch((error) => {
-      console.log(error);
     });
   };
 
@@ -121,7 +124,7 @@ class Propeller extends Component {
 
           if(route.kind === 'pipeline-summary') {
             return (
-              <PipelineSummary concourse={this.concourse} navigator={navigator} pipelines={pipelines} />
+              <PipelineSummary concourse={this.concourse} navigator={navigator} pipelines={pipelines} refreshPipelines={this.refreshPipelines.bind(this)} />
             );
           } else if(route.kind === 'build') {
             return (

@@ -42,8 +42,6 @@ class TaskDetails extends Component {
 
     const {html} = this.state;
 
-    console.log(html);
-
     return (
       <View style={styles.container}>
         <View style={{height: 100}}>

@@ -13,6 +13,7 @@
     "react": "^0.14.8",
     "react-native": "^0.25.1",
     "react-native-eventsource": "file:/Users/william/workspace/react-native-eventsource",
+    "react-native-gifted-listview": "0.0.15",
     "react-native-vector-icons": "^2.0.0"
   }
 }
