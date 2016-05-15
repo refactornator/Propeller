@@ -14,23 +14,29 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const BuildHeader = require('./build_header');
 
+const statusColors = {
+  failed: '#E74C3C',
+  paused: '#E74C3C',
+  aborted: '#8F4B2D',
+  errored: '#E67E22',
+  succeeded: '#2ECC71'
+}
+
 class JobBuildSummary extends Component {
   constructor(props) {
     super(props);
-    const {concourse, build} = props;
+    const {concourse, build, inputs} = props;
     const buildId = build.id;
 
     this.state = {
       task: {},
-      resources: {
-        'inputs': [],
-        'outputs': []
-      },
+      inputs,
+      outputs: [],
       messages: []
     };
 
     concourse.fetchBuildResources(buildId).then((resources) => {
-      this.setState({resources});
+      this.setState({inputs: resources.inputs, outputs: resources.outputs});
     });
 
     concourse.fetchBuildPlan(buildId).then((plan) => {
@@ -39,27 +45,73 @@ class JobBuildSummary extends Component {
         name: plan.plan.do[1].task.name,
         status: null
       };
+
+      //populate input object with resource id
+      let inputs = Object.assign([], this.state.inputs);
+      inputs.forEach(input => {
+        let inputResources = plan.plan.do[0].aggregate;
+        inputResources.forEach(inputResource => {
+          if(inputResource.get.name === input.name) {
+            input.id = inputResource.id;
+          }
+        })
+      });
+      this.setState({inputs});
+
       let eventSource = concourse.initEventSourceForBuild(buildId);
       eventSource.onopen = () => {
         console.log('EventSource::onopen');
       };
-      eventSource.onmessage = (event) => {
-        let message;
+      eventSource.onmessage = function(event) {
+        let message, indexToReplace, inputToReplaceWith;
         try {
           message = JSON.parse(event.message);
 
-          if (message.event === 'finish-task') {
+          let newTask = Object.assign({}, task);
+          if (message.event === 'finish-get') {
+            indexToReplace = inputs.findIndex(input => input.name === message.data.plan.name);
+            if(indexToReplace >= 0) {
+              inputToReplaceWith = inputs[indexToReplace];
+              if(message.data.exit_status === 0) {
+                inputToReplaceWith.status = 'succeeded';
+              } else if(message.data.exit_status > 0) {
+                inputToReplaceWith.status = 'failed';
+              }
+              inputs.splice(indexToReplace, 1, inputToReplaceWith);
+            }
+          } else if (message.event === 'finish-task') {
             if(task.id === message.data.origin.id) {
-              const newTask = Object.assign({}, task, {status: message.data.exit_status});
-              this.setState({task: newTask});
+              if(message.data.exit_status === 0) {
+                newTask.status = 'succeeded';
+              } else if (message.data.exit_status === 1) {
+                newTask.status = 'failed';
+              }
+            }
+          } else if (message.event === 'error') {
+            if(task.id === message.data.origin.id) {
+              if(message.data.message === 'interrupted') {
+                newTask.status = 'aborted';
+              } else {
+                newTask.status = 'errored';
+              }
+            }
+          } else if (message.event === 'log') {
+            indexToReplace = inputs.findIndex(input => input.id === message.data.origin.id);
+            if(indexToReplace >= 0) {
+              inputToReplaceWith = Object.assign({}, inputs[indexToReplace]);
+              if(inputToReplaceWith.logs == undefined) {
+                inputToReplaceWith.logs = [];
+              }
+              inputToReplaceWith.logs.push(message.data.payload);
+              inputs.splice(indexToReplace, 1, inputToReplaceWith);
             }
           }
 
-          this.setState({messages: this.state.messages.concat([message])});
+          this.setState({inputs, task: newTask, messages: this.state.messages.concat([message])});
         } catch(error) {
           console.log(error);
         }
-      };
+      }.bind(this);
       this.setState({task, eventSource});
     });
   }
@@ -79,9 +131,9 @@ class JobBuildSummary extends Component {
 
   _onPressInputBar = (basicInput, build) => {
     const {navigator} = this.props;
-    const fullInput = this.state.resources.inputs.find((inputResource) => {
-      return basicInput.name === inputResource.name;
-    });
+    const {inputs} = this.state;
+
+    const fullInput = inputs.find(input => basicInput.name === input.name);
 
     navigator.push({
       title: 'logs',
@@ -105,8 +157,8 @@ class JobBuildSummary extends Component {
   }
 
   render() {
-    const {task} = this.state;
-    const {concourse, build, inputs} = this.props;
+    const {task, inputs} = this.state;
+    const {concourse, build} = this.props;
     const {start_time, end_time} = build;
 
     let startTimeReadable = this.timeFromNow(start_time);
@@ -124,7 +176,8 @@ class JobBuildSummary extends Component {
               {input.name}
             </Text>
             <View style={styles.status}>
-              <Icon name="check" size={14} color="#1DC762" style={styles.statusIcon} />
+              {input.status === 'succeeded' ? <Icon name="check" size={14} color={statusColors[input.status]} style={styles.statusIcon} /> : null}
+              {input.status === 'failed' ? <Icon name="times" size={14} color={statusColors[input.status]} style={styles.statusIcon} /> : null}
             </View>
           </View>
         </TouchableHighlight>
@@ -133,14 +186,18 @@ class JobBuildSummary extends Component {
 
     let taskView;
     if(task) {
+      let inputFailed = inputs.some(input => input.status === 'failed');
       taskView = (
         <TouchableHighlight onPress={this._onPressTaskBar.bind(this, task)}>
           <View key={task.id} style={styles.taskRow}>
             <Text style={styles.taskName}>{task.name}</Text>
             <View style={styles.taskStatus}>
-              {task.status === null ? <ActivityIndicatorIOS animating={true} style={[styles.centering, {paddingRight: 10}]} size="small" /> : null}
-              {task.status === 0 ? <Icon name="check" size={14} color="#1DC762" style={styles.statusIcon} /> : null}
-              {task.status === 1 ? <Icon name="times" size={14} color="#E74C3C" style={styles.statusIcon} /> : null}
+              {inputFailed ? <Icon name="circle" size={14} color="#5D6D7E" style={styles.statusIcon} /> : null }
+              {task.status === 'errored' ? <Icon name="exclamation-triangle" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null }
+              {task.status === 'aborted' ? <Icon name="ban" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null }
+              {!inputFailed && task.status === null ? <ActivityIndicatorIOS animating={true} style={[styles.centering, {paddingRight: 10}]} color="white" size="small" /> : null}
+              {task.status === 'succeeded' ? <Icon name="check" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null}
+              {task.status === 'failed' ? <Icon name="times" size={14} color={statusColors[task.status]} style={styles.statusIcon} /> : null}
             </View>
           </View>
         </TouchableHighlight>

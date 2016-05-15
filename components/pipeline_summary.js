@@ -12,6 +12,14 @@ import GiftedListView from 'react-native-gifted-listview';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
+const statusColors = {
+  failed: '#E74C3C',
+  paused: '#E74C3C',
+  aborted: '#8F4B2D',
+  errored: '#E67E22',
+  succeeded: '#2ECC71'
+}
+
 class Pipeline extends Component {
   constructor(props) {
     super(props);
@@ -64,12 +72,13 @@ class Pipeline extends Component {
     const {pipeline} = this.props;
 
     let jobBars = jobs.filter((job) => {
-      return job.finished_build && job.finished_build.status === 'failed'
+      return job.finished_build && job.finished_build.status !== 'succeeded'
     }).map((job) => {
+      const status = job.finished_build.status;
       return (
         <View key={job.name}>
           <TouchableHighlight onPress={this._onPressJobBar.bind(this, job.name, job.finished_build, job.inputs)}>
-            <View key={job.name} style={styles.jobBar}>
+            <View key={job.name} style={[styles.jobBar, {backgroundColor: statusColors[status]}]}>
               <Icon style={styles.jobBarIcon} name="times" size={16} color="white" /><Text style={styles.jobName}>{job.name}</Text>
             </View>
           </TouchableHighlight>
@@ -184,7 +193,6 @@ const styles = StyleSheet.create({
     height: 44,
     marginBottom: 4,
     alignItems: 'center',
-    backgroundColor: '#E74C3C'
   },
   jobBarIcon: {
     paddingLeft: 10

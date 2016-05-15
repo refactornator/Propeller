@@ -11,6 +11,9 @@ import Icon from 'react-native-vector-icons/FontAwesome';
 
 const statusColors = {
   failed: '#E74C3C',
+  paused: '#E74C3C',
+  aborted: '#8F4B2D',
+  errored: '#E67E22',
   succeeded: '#2ECC71'
 }
 
