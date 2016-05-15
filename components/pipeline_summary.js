@@ -6,6 +6,7 @@ import {
   Navigator,
   ScrollView,
   TouchableHighlight,
+  ActivityIndicatorIOS,
 } from 'react-native';
 
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -15,10 +16,10 @@ class Pipeline extends Component {
     super(props);
 
     this.props.concourse.fetchJobs(props.pipeline.name).then((jobs) => {
-      this.setState({jobs});
+      this.setState({jobs, jobsFetched: true});
     });
 
-    this.state = {jobs: [], paused: props.pipeline.paused};
+    this.state = {jobs: [], jobsFetched: false, paused: props.pipeline.paused};
   }
 
   _onPressJobBar = (jobName, build, inputs) => {
@@ -37,7 +38,7 @@ class Pipeline extends Component {
     const {concourse, pipeline} = this.props;
 
     this.setState({paused: !this.state.paused});
-    
+
     if(pipeline.paused) {
       concourse.unpause(pipeline.name).then(response => {
         if(response.status === 200) {
@@ -58,7 +59,7 @@ class Pipeline extends Component {
   }
 
   render() {
-    const {jobs, paused} = this.state;
+    const {jobs, paused, jobsFetched} = this.state;
     const {pipeline} = this.props;
 
     let jobBars = jobs.filter((job) => {
@@ -79,11 +80,19 @@ class Pipeline extends Component {
       <View>
         <View style={styles.pipelineRow}>
           <Text style={styles.pipelineName}>{pipeline.name}</Text>
-          <TouchableHighlight onPress={this._onPressPauseButton}>
-            <View style={[styles.button, paused ? styles.paused : styles.unpaused]}>
-              {paused ? <Icon name="play" size={16} color="white" /> : <Icon name="pause" size={16} color="white" />}
-            </View>
-          </TouchableHighlight>
+          {jobsFetched ? (
+            <TouchableHighlight onPress={this._onPressPauseButton}>
+              <View style={[styles.button, paused ? styles.paused : styles.unpaused]}>
+                {paused ? <Icon name="play" size={16} color="white" /> : <Icon name="pause" size={16} color="white" />}
+              </View>
+            </TouchableHighlight>
+          ) : (
+            <ActivityIndicatorIOS
+              animating={true}
+              style={[styles.centering, {height: 44, paddingRight: 12}]}
+              size="small"
+            />
+          )}
         </View>
         {jobBars}
       </View>
@@ -116,6 +125,10 @@ const styles = StyleSheet.create({
     flex: 1,
     paddingTop: 64,
     backgroundColor: '#273747',
+  },
+  centering: {
+    alignItems: 'center',
+    justifyContent: 'center',
   },
   pipelineRow: {
     height: 44,
