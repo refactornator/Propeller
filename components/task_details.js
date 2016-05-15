@@ -37,9 +37,6 @@ class TaskDetails extends Component {
     };
   }
 
-  _handleCloseEvent = (e) => {
-  }
-
   render() {
     const {concourse, task, build} = this.props;
 
@@ -50,7 +47,7 @@ class TaskDetails extends Component {
     return (
       <View style={styles.container}>
         <View style={{height: 100}}>
-          <BuildHeader concourse={this.concourse} build={build} />
+          <BuildHeader concourse={concourse} build={build} />
           <View style={styles.taskBar}>
             <Text style={styles.taskName}>{task.name}</Text>
             <View style={styles.taskStatus}>

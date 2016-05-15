@@ -15,7 +15,7 @@ const statusColors = {
 }
 
 class BuildHeader extends Component {
-  _onPressStartJob = (event) => {
+  _onPressStartJob(e) {
     const {concourse} = this.props;
     const {job_name, pipeline_name} = this.props.build;
     concourse.startBuild(pipeline_name, job_name);
