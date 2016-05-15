@@ -10,24 +10,22 @@ import {
 
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-class Jobs extends Component {
+class Pipeline extends Component {
   constructor(props) {
     super(props);
 
-    const {pipelineName} = this.props;
-
-    this.props.concourse.fetchJobs(pipelineName).then((jobs) => {
+    this.props.concourse.fetchJobs(props.pipeline.name).then((jobs) => {
       this.setState({jobs});
     });
 
-    this.state = {jobs: []};
+    this.state = {jobs: [], paused: props.pipeline.paused};
   }
 
   _onPressJobBar = (jobName, build, inputs) => {
-    const {navigator, pipelineName} = this.props;
+    const {navigator, pipeline} = this.props;
 
     navigator.push({
-      title: pipelineName,
+      title: pipeline.name,
       kind: 'build',
       jobName,
       build,
@@ -35,8 +33,33 @@ class Jobs extends Component {
     });
   }
 
+  _onPressPauseButton = () => {
+    const {concourse, pipeline} = this.props;
+
+    this.setState({paused: !this.state.paused});
+    
+    if(pipeline.paused) {
+      concourse.unpause(pipeline.name).then(response => {
+        if(response.status === 200) {
+          //everything worked a-ok, trigger pipeline refresh
+        } else {
+          this.setState({paused: true});
+        }
+      });
+    } else {
+      concourse.pause(pipeline.name).then(response => {
+        if(response.status === 200) {
+          //everything worked a-ok, trigger pipeline refresh
+        } else {
+          this.setState({paused: false});
+        }
+      });
+    }
+  }
+
   render() {
-    const {jobs} = this.state;
+    const {jobs, paused} = this.state;
+    const {pipeline} = this.props;
 
     let jobBars = jobs.filter((job) => {
       return job.finished_build && job.finished_build.status === 'failed'
@@ -44,7 +67,7 @@ class Jobs extends Component {
       return (
         <View key={job.name}>
           <TouchableHighlight onPress={this._onPressJobBar.bind(this, job.name, job.finished_build, job.inputs)}>
-            <View key={job.name} style={styles.jobBar} onPress={this._onPressJobBar}>
+            <View key={job.name} style={styles.jobBar}>
               <Icon style={styles.jobBarIcon} name="times" size={16} color="white" /><Text style={styles.jobName}>{job.name}</Text>
             </View>
           </TouchableHighlight>
@@ -54,6 +77,14 @@ class Jobs extends Component {
 
     return (
       <View>
+        <View style={styles.pipelineRow}>
+          <Text style={styles.pipelineName}>{pipeline.name}</Text>
+          <TouchableHighlight onPress={this._onPressPauseButton}>
+            <View style={[styles.button, paused ? styles.paused : styles.unpaused]}>
+              {paused ? <Icon name="play" size={16} color="white" /> : <Icon name="pause" size={16} color="white" />}
+            </View>
+          </TouchableHighlight>
+        </View>
         {jobBars}
       </View>
     );
@@ -67,15 +98,7 @@ class PipelineSummary extends Component {
     const pipelineViews = pipelines.map((pipeline) => {
       return (
         <View key={pipeline.name}>
-          <View style={styles.pipelineRow}>
-            <Text style={styles.pipelineName}>{pipeline.name}</Text>
-            <TouchableHighlight onPress={this._onPressButton}>
-              <View style={[styles.button, styles.paused]}>
-                <Icon name="play" size={16} color="white" />
-              </View>
-            </TouchableHighlight>
-          </View>
-          <Jobs concourse={this.props.concourse} navigator={navigator} pipelineName={pipeline.name} />
+          <Pipeline concourse={this.props.concourse} navigator={navigator} pipeline={pipeline} />
         </View>
       );
     });
