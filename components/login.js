@@ -6,8 +6,9 @@ import {
   Alert,
   View,
   TextInput,
-  TouchableHighlight,
+  TouchableOpacity,
 } from 'react-native';
+import LinearGradient from 'react-native-linear-gradient';
 
 import base64 from 'base-64';
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -45,34 +46,36 @@ class Login extends Component {
   render() {
     return (
       <View style={styles.container}>
-        <Text>Host:</Text>
-        <TextInput style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+        <Text style={styles.label}>Host</Text>
+        <TextInput style={styles.input}
           onChangeText={(host) => this.setState({host})}
           value={this.state.host}
           autoFocus={true}
           autoCapitalize='none'
           autoCorrect={false}
         />
-        <Text>Username:</Text>
-        <TextInput style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+        <Text style={styles.label}>Username</Text>
+        <TextInput style={styles.input}
           onChangeText={(username) => this.setState({username})}
           value={this.state.username}
           autoCapitalize='none'
           autoCorrect={false}
         />
-        <Text>Password:</Text>
-        <TextInput style={{height: 40, borderColor: 'gray', borderWidth: 1}}
+        <Text style={styles.label}>Password</Text>
+        <TextInput style={styles.input}
           onChangeText={(password) => this.setState({password})}
           value={this.state.password}
           secureTextEntry={true}
           autoCapitalize='none'
           autoCorrect={false}
         />
-        <TouchableHighlight onPress={this._onPressLoginButton}>
+        <TouchableOpacity onPress={this._onPressLoginButton}>
           <View style={styles.loginButton}>
-            <Text>Login</Text>
+            <LinearGradient colors={['#48C9D0', '#3498DB']} style={styles.linearGradient}>
+              <Text style={styles.loginText}>Login</Text>
+            </LinearGradient>
           </View>
-        </TouchableHighlight>
+        </TouchableOpacity>
       </View>
     );
   }
@@ -81,14 +84,43 @@ class Login extends Component {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    paddingTop: 64,
+    paddingTop: 74,
     backgroundColor: '#273747',
+  },
+  label: {
+    color: 'white',
+    marginLeft: 10,
+    fontFamily: 'Courier',
+  },
+  input: {
+    height: 32,
+    borderColor: 'gray',
+    borderWidth: 1,
+    marginLeft: 10,
+    marginRight: 10,
+    marginBottom: 10,
+    color: 'white',
+    fontFamily: 'Courier',
+  },
+  linearGradient: {
+    flex: 1,
+    paddingLeft: 15,
+    paddingRight: 15,
+    borderRadius: 5,
+    justifyContent: 'center',
+    alignItems: 'center'
   },
   loginButton: {
     flex: 1,
     height: 44,
-    justifyContent: 'center',
-    alignItems: 'center'
+    marginTop: 20,
+    marginLeft: 50,
+    marginRight: 50,
+    backgroundColor: 'transparent',
+  },
+  loginText: {
+    color: 'white',
+    fontFamily: 'Courier',
   }
 });
 
