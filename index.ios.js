@@ -198,6 +198,7 @@ const styles = StyleSheet.create({
     marginVertical: 9,
   },
   navBarLeftButton: {
+    paddingTop: 10,
     paddingLeft: 10,
   },
   navBarRightButton: {
