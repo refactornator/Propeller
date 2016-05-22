@@ -118,7 +118,7 @@ class Propeller extends Component {
   }
 
   login = (host, token) => {
-    this.concourse = new Concourse(host, token);
+    this.concourse = new Concourse(window.fetch, host, token);
     LOGGED_IN = true;
     this.refreshPipelines().then(() => {
       return AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]);

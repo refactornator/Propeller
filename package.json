@@ -3,7 +3,29 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
+    "test": "jest --coverage",
     "start": "node node_modules/react-native/local-cli/cli.js start"
+  },
+  "jest": {
+    "unmockedModulePathPatterns": [
+      "promise",
+      "source-map",
+      "<rootDir>/node_modules/react/",
+      "<rootDir>/node_modules/fbjs/",
+      "<rootDir>/node_modules/react-dom/",
+      "<rootDir>/node_modules/react-addons-test-utils/"
+    ],
+    "haste": {
+      "defaultPlatform": "ios",
+      "providesModuleNodeModules": [
+        "react",
+        "react-native"
+      ],
+      "platforms": [
+        "ios",
+        "android"
+      ]
+    }
   },
   "dependencies": {
     "ansi_up": "^1.3.0",
@@ -16,5 +38,12 @@
     "react-native-gifted-listview": "0.0.15",
     "react-native-linear-gradient": "^1.5.7",
     "react-native-vector-icons": "^2.0.0"
+  },
+  "devDependencies": {
+    "babel-jest": "^12.1.0",
+    "babel-polyfill": "^6.9.0",
+    "babel-preset-react-native": "^1.8.0",
+    "jest-cli": "^12.1.0",
+    "whatwg-fetch": "^1.0.0"
   }
 }

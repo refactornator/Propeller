@@ -5,7 +5,8 @@ let json = (response) => {
 };
 
 class Concourse {
-  constructor(host, token) {
+  constructor(fetch, host, token) {
+    this.fetch = fetch;
     this.host = host;
     this.endpoint = `${host}/api/v1`;
     this.cookie = `ATC-Authorization=Basic ${token}`;
@@ -17,54 +18,54 @@ class Concourse {
   }
 
   fetchPipelines() {
-    return fetch(`${this.endpoint}/pipelines`, this.baseOptions).then(json);
+    return this.fetch(`${this.endpoint}/pipelines`, this.baseOptions).then(json);
   }
 
   fetchJobs(pipelineName) {
-    return fetch(
+    return this.fetch(
       `${this.endpoint}/pipelines/${pipelineName}/jobs`, this.baseOptions
     ).then(json);
   }
 
   fetchResources(pipelineName) {
-    return fetch(`${this.endpoint}/pipelines/${pipelineName}/resources`, this.baseOptions);
+    return this.fetch(`${this.endpoint}/pipelines/${pipelineName}/resources`, this.baseOptions);
   }
 
   fetchBuilds() {
-    return fetch(`${this.endpoint}/builds`, this.baseOptions);
+    return this.fetch(`${this.endpoint}/builds`, this.baseOptions);
   }
 
   // Job build endpoints
   fetchBuild(buildId) {
-    return fetch(`${this.endpoint}/builds/${buildId}`, this.baseOptions);
+    return this.fetch(`${this.endpoint}/builds/${buildId}`, this.baseOptions);
   }
 
   fetchBuildPreparation(buildId) {
-    return fetch(`${this.endpoint}/builds/${buildId}/preparation`, this.baseOptions);
+    return this.fetch(`${this.endpoint}/builds/${buildId}/preparation`, this.baseOptions);
   }
 
   fetchBuildPlan(buildId) {
-    return fetch(`${this.endpoint}/builds/${buildId}/plan`, this.baseOptions).then(json);
+    return this.fetch(`${this.endpoint}/builds/${buildId}/plan`, this.baseOptions).then(json);
   }
 
   fetchBuildResources(buildId) {
-    return fetch(`${this.endpoint}/builds/${buildId}/resources`, this.baseOptions).then(json);
+    return this.fetch(`${this.endpoint}/builds/${buildId}/resources`, this.baseOptions).then(json);
   }
 
   fetchBuildEvents(buildId) {
-    return fetch(`${this.endpoint}/builds/${buildId}/events`, this.baseOptions);
+    return this.fetch(`${this.endpoint}/builds/${buildId}/events`, this.baseOptions);
   }
 
   startBuild(pipeline, job) {
-    return fetch(`${this.host}/pipelines/${pipeline}/jobs/${job}/builds`, Object.assign({}, this.baseOptions, {method: 'POST'}));
+    return this.fetch(`${this.host}/pipelines/${pipeline}/jobs/${job}/builds`, Object.assign({}, this.baseOptions, {method: 'POST'}));
   }
 
   pause(pipeline) {
-    return fetch(`${this.endpoint}/pipelines/${pipeline}/pause`, Object.assign({}, this.baseOptions, {method: 'PUT'}));
+    return this.fetch(`${this.endpoint}/pipelines/${pipeline}/pause`, Object.assign({}, this.baseOptions, {method: 'PUT'}));
   }
 
   unpause(pipeline) {
-    return fetch(`${this.endpoint}/pipelines/${pipeline}/unpause`, Object.assign({}, this.baseOptions, {method: 'PUT'}));
+    return this.fetch(`${this.endpoint}/pipelines/${pipeline}/unpause`, Object.assign({}, this.baseOptions, {method: 'PUT'}));
   }
 
   initEventSourceForBuild(buildId) {
