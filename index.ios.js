@@ -16,6 +16,8 @@ import {
   AsyncStorage,
 } from 'react-native';
 
+import Icon from 'react-native-vector-icons/FontAwesome';
+
 import Concourse from './api/concourse';
 
 import Login from './components/login';
@@ -26,12 +28,27 @@ import TaskDetails from './components/task_details';
 
 let HOST_STORAGE_KEY = '@Propeller:HOST';
 let TOKEN_STORAGE_KEY = '@Propeller:TOKEN';
+let LOGGED_IN = false;
 
 var NavigationBarRouteMapper = {
 
   LeftButton: function(route, navigator, index, navState) {
     if (index === 0) {
-      return null;
+      if(LOGGED_IN) {
+        return (
+          <TouchableOpacity
+            onPress={() => {
+              navigator.resetTo({
+                kind: 'logout'
+              });
+            }}
+            style={styles.navBarLeftButton}>
+            <Icon name="sign-out" size={16} color="white" />
+          </TouchableOpacity>
+        );
+      } else {
+        return null;
+      }
     }
 
     var previousRoute = navState.routeStack[index - 1];
@@ -68,7 +85,8 @@ class Propeller extends Component {
   constructor(props) {
     super(props);
 
-    this.state = {loggedIn: false};
+    this.state = {};
+
     try {
       AsyncStorage.multiGet([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY], (error, stores) => {
         let host, token;
@@ -101,11 +119,17 @@ class Propeller extends Component {
 
   login = (host, token) => {
     this.concourse = new Concourse(host, token);
-    this.setState({loggedIn: true});
+    LOGGED_IN = true;
     this.refreshPipelines().then(() => {
       return AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]);
     });
   };
+
+  logout() {
+    this.concourse = null;
+    LOGGED_IN = false;
+    AsyncStorage.multiRemove([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY]);
+  }
 
   render() {
     let {pipelines} = this.state;
@@ -115,8 +139,8 @@ class Propeller extends Component {
         debugOverlay={false}
         style={styles.appContainer}
         initialRoute={{title: 'Pipeline Summary', kind: 'pipeline-summary'}}
-        renderScene={(route, navigator) => {
-          if(!this.state.loggedIn) {
+        renderScene={function(route, navigator) {
+          if(!LOGGED_IN) {
             return (
               <Login onLogin={this.login} />
             );
@@ -138,8 +162,11 @@ class Propeller extends Component {
             return (
               <TaskDetails concourse={this.concourse} navigator={navigator} build={route.build} task={route.task} messages={route.messages} />
             )
+          } else if(route.kind === 'logout') {
+            this.logout();
+            return <Login onLogin={this.login} />
           }
-        }}
+        }.bind(this)}
         navigationBar={
           <Navigator.NavigationBar
             routeMapper={NavigationBarRouteMapper}
