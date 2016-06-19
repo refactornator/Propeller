@@ -182,7 +182,6 @@ class JobBuildSummary extends Component {
 
     let taskView;
     if(task) {
-      console.log('task:', task);
       let inputFailed = inputs.some(input => input.status === 'failed');
       taskView = (
         <View key={task.id} style={styles.taskRow}>

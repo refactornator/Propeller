@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import {
+  AsyncStorage,
   StyleSheet,
   Text,
   View,
@@ -7,10 +8,14 @@ import {
   TouchableHighlight,
   ActivityIndicatorIOS,
 } from 'react-native';
-
+import {observer} from 'mobx-react/native';
 import GiftedListView from 'react-native-gifted-listview';
-
 import Icon from 'react-native-vector-icons/FontAwesome';
+
+import Concourse from '../api/concourse';
+
+const HOST_STORAGE_KEY = '@Propeller:HOST';
+const TOKEN_STORAGE_KEY = '@Propeller:TOKEN';
 
 const statusColors = {
   failed: '#E74C3C',
@@ -24,7 +29,7 @@ class Pipeline extends Component {
   constructor(props) {
     super(props);
 
-    this.props.concourse.fetchJobs(props.pipeline.name).then((jobs) => {
+    props.concourse.fetchJobs(props.pipeline.name).then((jobs) => {
       this.setState({jobs, jobsFetched: true});
     });
 
@@ -110,43 +115,84 @@ class Pipeline extends Component {
   }
 }
 
+@observer
 class PipelineSummary extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {loggedIn: false};
+
+    try {
+      AsyncStorage.multiGet([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY], (error, stores) => {
+        let host, token;
+        stores.forEach((store) => {
+          let key = store[0];
+          let value = store[1];
+          if(key === HOST_STORAGE_KEY) {
+            host = value;
+          } else if (key === TOKEN_STORAGE_KEY) {
+            token = value;
+          }
+        });
+        if(host && token) {
+          this.login(host, token);
+        } else {
+          console.log('not currently logged in');
+        }
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  }
+
+  login(host, token) {
+    const {store} = this.props;
+    this.concourse = new Concourse(window.fetch, host, token);
+    this.setState({loggedIn: true});
+    store.refreshPipelines(this.concourse);
+    AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]);
+  }
+
+  logout() {
+    this.concourse = null;
+    this.setState({loggedIn: false});
+    AsyncStorage.multiRemove([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY]);
+  }
+
   onRefresh(page, callback, options) {
-    this.props.refreshPipelines().then(pipelines => {
-      callback(pipelines);
-    });
+    const {store} = this.props;
+    const pipelines = store.pipelines.slice();
+    callback(pipelines);
   }
 
   renderRow(pipeline) {
-    const {concourse, navigator} = this.props;
-
     return (
-      <View key={pipeline.name}>
-        <Pipeline concourse={concourse} navigator={navigator} pipeline={pipeline} />
-      </View>
+      <Pipeline concourse={this.concourse} pipeline={pipeline} />
     );
   }
 
   render() {
-    const {pipelines} = this.props;
+    const {pipelines} = this.props.store;
 
     return (
       <View style={styles.container}>
-        <GiftedListView
-          rowView={this.renderRow.bind(this)}
-          onFetch={this.onRefresh.bind(this)}
-          firstLoader={true} // display a loader for the first fetching
-          pagination={false} // enable infinite scrolling using touch to load more
-          refreshable={true} // enable pull-to-refresh for iOS and touch-to-refresh for Android
-          withSections={false} // enable sections
-          enableEmptySections={true}
-          customStyles={{
-            paginationView: {
-              backgroundColor: '#273747'
-            }
-          }}
-          refreshableTintColor="white"
-        />
+        {pipelines.length === 0 ? null :
+          <GiftedListView
+            rowView={this.renderRow.bind(this)}
+            onFetch={this.onRefresh.bind(this)}
+            firstLoader={true} // display a loader for the first fetching
+            pagination={false} // enable infinite scrolling using touch to load more
+            refreshable={true} // enable pull-to-refresh for iOS and touch-to-refresh for Android
+            withSections={false} // enable sections
+            enableEmptySections={true}
+            customStyles={{
+              paginationView: {
+                backgroundColor: '#273747'
+              }
+            }}
+            refreshableTintColor="white"
+          />
+      }
       </View>
     );
   }
