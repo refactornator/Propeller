@@ -6,24 +6,30 @@ import {
   computed,
   autorun
 } from 'mobx';
-import autobind from 'autobind-decorator'
+import autobind from 'autobind-decorator';
+
+import Concourse from '../api/concourse';
 
 @autobind
 class PipelinesStore {
   @observable concourse;
   @observable pipelines = [];
 
-  constructor() {
-    //this.refreshPipelines(WHERE_IS_CONCOURSE);
+  initConcourse(host, token) {
+    this.concourse = new Concourse(window.fetch, host, token);
   }
 
   refreshPipelines() {
-    return this.concourse.fetchPipelines()
-      .then(pipelines => {
-        extendObservable(this, {
-          pipelines
+    if (this.concourse) {
+      return this.concourse.fetchPipelines()
+        .then(pipelines => {
+          extendObservable(this, {
+            pipelines
+          });
         });
-      });
+    } else {
+      console.log('tried to fetch pipelines, but concourse was not initialized.');
+    }
   }
 }
 

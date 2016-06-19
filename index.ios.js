@@ -17,7 +17,6 @@ import {Router, Scene} from 'react-native-mobx';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
 import PipelinesStore from './store/pipelines';
-import Concourse from './api/concourse';
 
 import Login from './components/login';
 import PipelineSummary from './components/pipeline_summary';
@@ -61,16 +60,18 @@ class Propeller extends Component {
   }
 
   login(host, token) {
-    this.setState({loading: false, loggedIn: true});
-    this.store.concourse = new Concourse(window.fetch, host, token);
+    this.store.initConcourse(host, token);
     this.store.refreshPipelines();
-    AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]);
+    AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]).then(() => {
+      this.setState({loading: false, loggedIn: true});
+    });
   }
 
   logout() {
     this.store.concourse = null;
-    this.setState({loading: false, loggedIn: false});
-    AsyncStorage.multiRemove([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY]);
+    AsyncStorage.multiRemove([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY]).then(() => {
+      this.setState({loading: false, loggedIn: false});
+    });
   }
 
   render() {
@@ -82,7 +83,10 @@ class Propeller extends Component {
       if(loggedIn) {
         return (
           <Router store={this.store}>
-            <Scene key="root" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle}>
+            <Scene key="root" onLeft={this.logout.bind(this)}
+              navigationBarStyle={styles.navigationBarStyle}
+              titleStyle={styles.titleStyle}
+              leftTitle={<Icon name="sign-out" size={16} color="white" />}>
               <Scene key="pipelineSummary" component={PipelineSummary} title="Pipeline Summary"/>
               <Scene key="jobBuildSummary" component={JobBuildSummary} title="Job Build Summary"/>
               <Scene key="inputDetails" component={InputDetails} title="logs"/>
