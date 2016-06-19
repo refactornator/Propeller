@@ -27,10 +27,12 @@ class Propeller extends Component {
   render() {
     return (
       <Router store={store}>
-        <Scene key="pipelineSummary" component={PipelineSummary} title="Pipeline Summary" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
-        <Scene key="jobBuildSummary" component={JobBuildSummary} title="Job Build Summary" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
-        <Scene key="inputDetails" component={InputDetails} title="logs" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
-        <Scene key="taskDetails" component={TaskDetails} title="logs" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
+        <Scene key="root" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle}>
+          <Scene key="pipelineSummary" component={PipelineSummary} title="Pipeline Summary"/>
+          <Scene key="jobBuildSummary" component={JobBuildSummary} title="Job Build Summary"/>
+          <Scene key="inputDetails" component={InputDetails} title="logs"/>
+          <Scene key="taskDetails" component={TaskDetails} title="logs"/>
+        </Scene>
       </Router>
     );
   }
