@@ -29,6 +29,8 @@ class Propeller extends Component {
       <Router store={store}>
         <Scene key="pipelineSummary" component={PipelineSummary} title="Pipeline Summary" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
         <Scene key="jobBuildSummary" component={JobBuildSummary} title="Job Build Summary" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
+        <Scene key="inputDetails" component={InputDetails} title="logs" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
+        <Scene key="taskDetails" component={TaskDetails} title="logs" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
       </Router>
     );
   }

@@ -8,6 +8,7 @@ import {
   TouchableHighlight,
   ActivityIndicatorIOS
 } from 'react-native';
+import { Actions } from 'react-native-router-flux';
 import moment from 'moment';
 require('moment-duration-format');
 import Icon from 'react-native-vector-icons/FontAwesome';
@@ -125,29 +126,23 @@ class JobBuildSummary extends Component {
   }
 
   _onPressInputBar = (basicInput, build) => {
-    const {navigator} = this.props;
+    const {concourse} = this.props;
     const {inputs} = this.state;
 
     const fullInput = inputs.find(input => basicInput.name === input.name);
 
-    navigator.push({
-      title: 'logs',
-      kind: 'input',
-      input: fullInput,
-      build
-    });
+    Actions.inputDetails({input: fullInput, build, concourse});
   }
 
   _onPressTaskBar = (task) => {
-    const {navigator, build} = this.props;
+    const {concourse, build} = this.props;
     const {messages} = this.state;
 
-    navigator.push({
-      title: 'logs',
-      kind: 'task',
+    Actions.taskDetails({
+      concourse,
       messages,
       build,
-      task,
+      task
     });
   }
 
