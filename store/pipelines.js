@@ -27,4 +27,4 @@ class PipelinesStore {
   }
 }
 
-export default new PipelinesStore();
+export default PipelinesStore;
