@@ -51,6 +51,7 @@ class Propeller extends Component {
         } else {
           console.log('not currently logged in');
         }
+        this.setState({loading: false});
       });
     } catch (error) {
       console.log(error);
@@ -90,7 +91,7 @@ class Propeller extends Component {
           </Router>
         );
       } else {
-        return <Scene key="login" component={Login} title="Login"/>;
+        return <Login onLogin={this.login.bind(this)} />;
       }
     }
   }
