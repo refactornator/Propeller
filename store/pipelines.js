@@ -10,14 +10,15 @@ import autobind from 'autobind-decorator'
 
 @autobind
 class PipelinesStore {
+  @observable concourse;
   @observable pipelines = [];
 
   constructor() {
     //this.refreshPipelines(WHERE_IS_CONCOURSE);
   }
 
-  refreshPipelines(concourse) {
-    return concourse.fetchPipelines()
+  refreshPipelines() {
+    return this.concourse.fetchPipelines()
       .then(pipelines => {
         extendObservable(this, {
           pipelines

@@ -26,7 +26,8 @@ const statusColors = {
 class JobBuildSummary extends Component {
   constructor(props) {
     super(props);
-    const {concourse, build, inputs: initialInputs} = props;
+    const {store, build, inputs: initialInputs} = props;
+    const {concourse} = store;
     const buildId = build.id;
 
     this.state = {
@@ -126,20 +127,20 @@ class JobBuildSummary extends Component {
   }
 
   _onPressInputBar = (basicInput, build) => {
-    const {concourse} = this.props;
+    const {store} = this.props;
     const {inputs} = this.state;
 
     const fullInput = inputs.find(input => basicInput.name === input.name);
 
-    Actions.inputDetails({input: fullInput, build, concourse});
+    Actions.inputDetails({input: fullInput, build, store});
   }
 
   _onPressTaskBar = (task) => {
-    const {concourse, build} = this.props;
+    const {store, build} = this.props;
     const {messages} = this.state;
 
     Actions.taskDetails({
-      concourse,
+      store,
       messages,
       build,
       task
@@ -148,7 +149,8 @@ class JobBuildSummary extends Component {
 
   render() {
     const {task, inputs} = this.state;
-    const {concourse, build} = this.props;
+    const {store, build} = this.props;
+    const {concourse} = store;
     const {start_time, end_time} = build;
 
     let startTimeReadable = this.timeFromNow(start_time);

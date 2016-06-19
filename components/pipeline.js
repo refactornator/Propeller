@@ -21,7 +21,7 @@ class Pipeline extends Component {
   constructor(props) {
     super(props);
 
-    props.concourse.fetchJobs(props.pipeline.name).then((jobs) => {
+    props.store.concourse.fetchJobs(props.pipeline.name).then((jobs) => {
       this.setState({jobs, jobsFetched: true});
     });
 
@@ -29,13 +29,14 @@ class Pipeline extends Component {
   }
 
   _onPressJobBar = (jobName, build, inputs) => {
-    const {pipeline, concourse} = this.props;
+    const {store, pipeline} = this.props;
 
-    Actions.jobBuildSummary({text: pipeline.name, concourse, jobName, build, inputs});
+    Actions.jobBuildSummary({text: pipeline.name, store, jobName, build, inputs});
   }
 
   _onPressPauseButton = () => {
-    const {concourse, pipeline} = this.props;
+    const {store, pipeline} = this.props;
+    const {concourse} = store;
 
     this.setState({paused: !this.state.paused});
 

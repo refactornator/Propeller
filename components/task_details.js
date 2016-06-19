@@ -25,7 +25,8 @@ const statusColors = {
 class TaskDetails extends Component {
   constructor(props) {
     super(props);
-    const {concourse, messages, build, task} = props;
+    const {store, messages, build, task} = props;
+    const {concourse} = store;
     const buildId = build.id;
 
     let tempLogs = messages.map((message) => {
@@ -46,7 +47,8 @@ class TaskDetails extends Component {
   }
 
   render() {
-    const {concourse, task, build} = this.props;
+    const {store, task, build} = this.props;
+    const {concourse} = store;
 
     const {html} = this.state;
 

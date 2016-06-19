@@ -20,7 +20,8 @@ const statusColors = {
 
 class InputDetails extends Component {
   render() {
-    const {concourse, input, build} = this.props;
+    const {store, input, build} = this.props;
+    const {concourse} = this.props;
 
     const metadata = input.metadata.map((line, i) => {
       return (
@@ -33,7 +34,7 @@ class InputDetails extends Component {
 
     return (
       <ScrollView style={styles.container}>
-        <BuildHeader concourse={this.concourse} build={build} />
+        <BuildHeader concourse={concourse} build={build} />
         <View style={styles.jobBar}>
           <Text style={styles.input}>{input.name}</Text>
           {input.status === 'succeeded' ? <Icon name="check" size={14} color={statusColors[input.status]} style={styles.jobBarIcon} /> : null}

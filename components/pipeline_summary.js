@@ -1,6 +1,5 @@
 import React, { Component } from 'react';
 import {
-  AsyncStorage,
   StyleSheet,
   Text,
   View,
@@ -12,12 +11,7 @@ import { observer } from 'mobx-react/native';
 import GiftedListView from 'react-native-gifted-listview';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
-import Concourse from '../api/concourse';
-
 import Pipeline from './pipeline';
-
-const HOST_STORAGE_KEY = '@Propeller:HOST';
-const TOKEN_STORAGE_KEY = '@Propeller:TOKEN';
 
 const statusColors = {
   failed: '#E74C3C',
@@ -33,42 +27,6 @@ class PipelineSummary extends Component {
     super(props);
 
     this.state = {loggedIn: false};
-
-    try {
-      AsyncStorage.multiGet([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY], (error, stores) => {
-        let host, token;
-        stores.forEach((store) => {
-          let key = store[0];
-          let value = store[1];
-          if(key === HOST_STORAGE_KEY) {
-            host = value;
-          } else if (key === TOKEN_STORAGE_KEY) {
-            token = value;
-          }
-        });
-        if(host && token) {
-          this.login(host, token);
-        } else {
-          console.log('not currently logged in');
-        }
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  login(host, token) {
-    const {store} = this.props;
-    this.concourse = new Concourse(window.fetch, host, token);
-    this.setState({loggedIn: true});
-    store.refreshPipelines(this.concourse);
-    AsyncStorage.multiSet([[HOST_STORAGE_KEY, host], [TOKEN_STORAGE_KEY, token]]);
-  }
-
-  logout() {
-    this.concourse = null;
-    this.setState({loggedIn: false});
-    AsyncStorage.multiRemove([HOST_STORAGE_KEY, TOKEN_STORAGE_KEY]);
   }
 
   onRefresh(page, callback, options) {
@@ -78,8 +36,10 @@ class PipelineSummary extends Component {
   }
 
   renderRow(pipeline) {
+    const {store} = this.props;
+
     return (
-      <Pipeline concourse={this.concourse} pipeline={pipeline} />
+      <Pipeline store={store} pipeline={pipeline} />
     );
   }
 
