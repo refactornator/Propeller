@@ -27,7 +27,8 @@ class Propeller extends Component {
   render() {
     return (
       <Router store={store}>
-        <Scene key="pipeline_summary" component={PipelineSummary} title="Pipeline Summary" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
+        <Scene key="pipelineSummary" component={PipelineSummary} title="Pipeline Summary" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
+        <Scene key="jobBuildSummary" component={JobBuildSummary} title="Job Build Summary" navigationBarStyle={styles.navigationBarStyle} titleStyle={styles.titleStyle} />
       </Router>
     );
   }

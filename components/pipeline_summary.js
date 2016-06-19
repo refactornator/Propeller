@@ -8,7 +8,8 @@ import {
   TouchableHighlight,
   ActivityIndicatorIOS,
 } from 'react-native';
-import {observer} from 'mobx-react/native';
+import { Actions } from 'react-native-router-flux';
+import { observer } from 'mobx-react/native';
 import GiftedListView from 'react-native-gifted-listview';
 import Icon from 'react-native-vector-icons/FontAwesome';
 
@@ -37,15 +38,9 @@ class Pipeline extends Component {
   }
 
   _onPressJobBar = (jobName, build, inputs) => {
-    const {navigator, pipeline} = this.props;
+    const {pipeline, concourse} = this.props;
 
-    navigator.push({
-      title: pipeline.name,
-      kind: 'build',
-      jobName,
-      build,
-      inputs
-    });
+    Actions.jobBuildSummary({text: pipeline.name, concourse, jobName, build, inputs});
   }
 
   _onPressPauseButton = () => {
